@@ -1,0 +1,27 @@
+{
+  "name": "canonify-isomorphism",
+  "description": "Why REST, CLI, and MCP are three isomorphic projections of one Canon catalog — the runtime contract they all call, the envelope they all return, why they can't drift, and how to debug 'works on CLI but not REST'. Read SKILL.md first, then deep-dive on the runtime contract, the envelope shape, or how to debug a surface that seems to diverge.",
+  "version": "1.0.0",
+  "resources": [
+    {
+      "path": "resources/runtime-contract.md",
+      "title": "The runtime contract",
+      "description": "The five runtime entry points (invoke / get / list / navigate / sql_read) every surface calls, what each takes and returns, and how each surface maps onto them. The generators turn one catalog into three surfaces."
+    },
+    {
+      "path": "resources/envelope-shape-and-error-handling.md",
+      "title": "Envelope shape and error handling",
+      "description": "The exact envelope every call returns (data, audit_event_id, approval_status, knowledge_used, outcome_signals, optional error), with real success and error examples copied from the live conformance fixtures and the RuntimeError code contract."
+    },
+    {
+      "path": "resources/debugging-surface-divergence.md",
+      "title": "Debugging a surface that seems to diverge",
+      "description": "The checks that rule out the common cause (the two surfaces were called differently — a missing REST input wrapper, a different principal, a coerced arg), then the audit-trail recipe: invoke on each surface, fetch both stored envelopes via canon audit / GET /v1/audit, and diff them to localize the bug to a surface adapter."
+    },
+    {
+      "path": "resources/connect-claude-desktop.md",
+      "title": "Connect Claude Desktop to Canonify",
+      "description": "End-to-end quickstart for wiring an interactive MCP client to one org via per-org OAuth: find the org's /mcp/<slug> URL in Settings, add the mcpServers config, log in + consent in the browser (no API key pasted), one org per connection, auto-refreshing revocable tokens, and the DCR→authorize→token→/mcp handshake under the hood."
+    }
+  ]
+}

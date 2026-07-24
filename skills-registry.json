@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "packageVersion": "0.0.0",
+  "skills": [
+    {
+      "name": "canonify",
+      "description": "How to operate Canonify declaratively. Read SKILL.md first, then use the resources to deep-dive on a specific declaration verb, the handler DSL, or the error-code contract.",
+      "version": "1.0.0",
+      "path": "canonify"
+    },
+    {
+      "name": "canonify-app-authoring",
+      "description": "A top-to-bottom, build-an-app-from-nothing tutorial for agents. Five chapters, one declaration verb each, taking an empty Canon org to a working app: schema.propose_migration → catalog.refine_object_type → state_machines.register → actions.declare → view_specs.declare. Complements the base `canonify` reference skill (which documents each verb in isolation) by walking the whole model-b authoring loop end to end with one worked CRM-generic example. Every command, REST path, and MCP tool here is real — verify with `canon actions list`.",
+      "version": "1.0.0",
+      "path": "canonify-app-authoring"
+    },
+    {
+      "name": "canonify-esign-sender",
+      "description": "A reference ViewSpec catalog for the Canon-customer e-signature SENDER surface: a creator-scoped sent-agreements table (title + status + decline_reason, with a per-row void), plus a create form for new signing envelopes. Distributed as an on-disk catalog.apply bundle (views + policies only) that composes the PLATFORM signature_envelope object-type and the signature_envelope.create/.void actions already present in every canon — nothing is baked into the empty canon. Apply it on demand with `canon catalog apply`.",
+      "version": "1.0.0",
+      "path": "canonify-esign-sender"
+    },
+    {
+      "name": "canonify-isomorphism",
+      "description": "Why REST, CLI, and MCP are three isomorphic projections of one Canon catalog — the runtime contract they all call, the envelope they all return, why they can't drift, and how to debug 'works on CLI but not REST'. Read SKILL.md first, then deep-dive on the runtime contract, the envelope shape, or how to debug a surface that seems to diverge.",
+      "version": "1.0.0",
+      "path": "canonify-isomorphism"
+    },
+    {
+      "name": "canonify-objects-actions",
+      "description": "Deep-dive reference + tutorial for declaring ObjectTypes and ActionTypes in Canonify. Covers typed object shape (property kinds, enums, links, cardinality, on_delete), property visibility for the auth/read context, auto-CRUD overrides, and ActionType nuances — idempotency postures, governance, transition markers, and handler-DSL gotchas — with copy-paste recipes that decode against the live effect/Schema validators. Read after the base `canonify` skill.",
+      "version": "1.0.0",
+      "path": "canonify-objects-actions"
+    },
+    {
+      "name": "canonify-scenarios",
+      "description": "How to write + run declarative Canonify scenarios (session.yaml) that prove an app slice end-to-end through the public Canon surface — live verification, not jsdom mocking. Read SKILL.md first, then deep-dive on structure, patterns, or running + debugging.",
+      "version": "1.0.0",
+      "path": "canonify-scenarios"
+    },
+    {
+      "name": "canonify-viewspecs",
+      "description": "Author Canonify ViewSpecs — the declarative UI primitive. Compose catalog pieces (ObjectTypes + ActionTypes) into transport-agnostic views built from 10 block types (table, detail, panel, button, composite, metric, chart, file, board, queue), then declare and apply them to an org via view_specs.declare. Read SKILL.md first.",
+      "version": "1.0.0",
+      "path": "canonify-viewspecs"
+    }
+  ]
+}

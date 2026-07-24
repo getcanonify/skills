@@ -1,0 +1,22 @@
+{
+  "name": "canonify-scenarios",
+  "description": "How to write + run declarative Canonify scenarios (session.yaml) that prove an app slice end-to-end through the public Canon surface — live verification, not jsdom mocking. Read SKILL.md first, then deep-dive on structure, patterns, or running + debugging.",
+  "version": "1.0.0",
+  "resources": [
+    {
+      "path": "resources/scenario-structure.md",
+      "title": "Scenario structure",
+      "description": "The session.yaml document shape parsed by the harness SessionSchema (tests/scenarios/_harness/runner.ts): top-level name/principals/steps, the six step kinds (action / read / check / clock / orchestration / tick), the $ref grammar, and the expect matcher grammar (equals / matches / length / count / contains)."
+    },
+    {
+      "path": "resources/scenario-patterns.md",
+      "title": "Scenario patterns",
+      "description": "Worked, harness-valid examples: the CRM slice, an invoice FSM lifecycle, a multi-table atomic action, an outbox-enqueue assertion, and a governance / FSM-guard denial. Each fragment is copy-paste-ready and decodes cleanly against the runner's SessionSchema."
+    },
+    {
+      "path": "resources/running-and-debugging.md",
+      "title": "Running and debugging",
+      "description": "How to run scenarios through the harness (bun test, the CLI vs REST transport switch), how to isolate a single scenario, how to read the runner's verbatim CLI echo + AssertionFailure path output, and how the empty-canon test DB is booted and torn down."
+    }
+  ]
+}

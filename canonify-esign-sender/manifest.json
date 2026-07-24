@@ -1,0 +1,12 @@
+{
+  "name": "canonify-esign-sender",
+  "description": "A reference ViewSpec catalog for the Canon-customer e-signature SENDER surface: a creator-scoped sent-agreements table (title + status + decline_reason, with a per-row void), plus a create form for new signing envelopes. Distributed as an on-disk catalog.apply bundle (views + policies only) that composes the PLATFORM signature_envelope object-type and the signature_envelope.create/.void actions already present in every canon — nothing is baked into the empty canon. Apply it on demand with `canon catalog apply`.",
+  "version": "1.0.0",
+  "resources": [
+    {
+      "path": "resources/sender-catalog.md",
+      "title": "Sender catalog — apply guide",
+      "description": "How to apply the sender-catalog/ bundle with `canon catalog apply`, the creator_account_id prerequisite (the x20 server-side read-fence), the expected-revision optimistic-concurrency note, what the two views + three policies grant, and how re-apply is idempotent + managed-provenance-stamped."
+    }
+  ]
+}

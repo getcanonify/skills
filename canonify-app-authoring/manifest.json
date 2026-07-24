@@ -1,0 +1,37 @@
+{
+  "name": "canonify-app-authoring",
+  "description": "A top-to-bottom, build-an-app-from-nothing tutorial for agents. Five chapters, one declaration verb each, taking an empty Canon org to a working app: schema.propose_migration → catalog.refine_object_type → state_machines.register → actions.declare → view_specs.declare. Complements the base `canonify` reference skill (which documents each verb in isolation) by walking the whole model-b authoring loop end to end with one worked CRM-generic example. Every command, REST path, and MCP tool here is real — verify with `canon actions list`.",
+  "version": "1.0.0",
+  "resources": [
+    {
+      "path": "resources/schema-bootstrap.md",
+      "title": "Chapter 1 — Bootstrap the schema",
+      "description": "Use schema.propose_migration to create your first tables. Auto-CRUD synthesises the default ObjectType + create/read/update/delete/list actions from the table shape, so one migration gives you a working data model on every surface."
+    },
+    {
+      "path": "resources/objecttype-refinement.md",
+      "title": "Chapter 2 — Refine the ObjectType",
+      "description": "Use catalog.refine_object_type to upgrade the permissive auto-default into a rich domain shape: narrow string columns to enums (the prerequisite for a StateMachine), add typed links between ObjectTypes with on_delete policies, surface hidden columns, and write human descriptions."
+    },
+    {
+      "path": "resources/state-machines-binding.md",
+      "title": "Chapter 3 — Bind a StateMachine",
+      "description": "Use state_machines.register to bind a finite-state machine to an enum property. Transitions name the Action that drives them; on_enter/on_exit hooks enqueue follow-up actions. Registering the FSM is what lets your transition actions get a free guard + auto state-write."
+    },
+    {
+      "path": "resources/actions-multi-step.md",
+      "title": "Chapter 4 — Declare a custom ActionType",
+      "description": "Use actions.declare to register a multi-step ActionType whose handler is a JSON DSL — typed CRUD steps over ObjectTypes glued by the $input / $<step> / $now / $principal ref grammar, executed inside the runtime's tx + audit + outbox + FSM frame."
+    },
+    {
+      "path": "resources/viewspec-quick-start.md",
+      "title": "Chapter 5 — Compose a ViewSpec",
+      "description": "Use view_specs.declare to shape how the app renders: table, detail, panel, button, composite, metric, file, board, and queue. A ViewSpec shadows the renderer auto-default for an ObjectType and is validated against the live registry at declare time."
+    },
+    {
+      "path": "resources/starter-templates.md",
+      "title": "Starter templates — reach the elevated treatment by default",
+      "description": "Copy-paste ViewSpec templates that already embody the elevated, well-crafted look — an elegant record detail (header + metric strip + one linked section), a scannable list (presets + emphasizeWhen + curated columns), a board, and a metric tile — plus a seven-move 'reach elegance' checklist. Every field is current vocabulary that validates today; adapt the ObjectType and property names to your app."
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "canonify-viewspecs",
+  "description": "Author Canonify ViewSpecs — the declarative UI primitive. Compose catalog pieces (ObjectTypes + ActionTypes) into transport-agnostic views built from 10 block types (table, detail, panel, button, composite, metric, chart, file, board, queue), then declare and apply them to an org via view_specs.declare. Read SKILL.md first.",
+  "version": "1.0.0",
+  "resources": [
+    {
+      "path": "resources/viewspec-block-types.md",
+      "title": "The 10 block types",
+      "description": "Field-by-field reference for table, detail, panel, button, composite, metric, chart, file, board, and queue — the closed discriminated union the renderer dispatches on. Each block type with a full JSON example and an ASCII layout diagram."
+    },
+    {
+      "path": "resources/viewspec-binding-and-sources.md",
+      "title": "Binding and sources",
+      "description": "How a block binds to the catalog: ObjectTypeSource (objectType + filter + sort), AggregateSource (aggregate + groupBy), column-ref grammar (shorthand dot-traversal + link aggregates), filter scalars and range predicates, and the $context.* render-context grammar."
+    },
+    {
+      "path": "resources/viewspec-master-detail.md",
+      "title": "Master-detail recipe",
+      "description": "Compose a list that drills into a record detail: a table master plus a detail block that reads its record id from $context, with field-by-field property mapping and label overrides. Full JSON + ASCII layout."
+    },
+    {
+      "path": "resources/viewspec-analytics.md",
+      "title": "Metrics and grouped tables",
+      "description": "Aggregate-backed views: scalar metric (KPI) tiles and grouped summary tables. count / sum / avg / min / max with groupBy, the property-required rules, and a KPI-dashboard composite. Full JSON + ASCII layout."
+    },
+    {
+      "path": "resources/viewspec-forms-and-actions.md",
+      "title": "Forms and actions",
+      "description": "Wire ActionTypes into a view: panel (action form), button (one-tap invoke), presetParams + $context refs, submit labels, and showWhen UX conditioning. Includes the view_specs.declare authoring action. Full JSON + ASCII layout."
+    },
+    {
+      "path": "resources/viewspec-composition-patterns.md",
+      "title": "Composition and apply",
+      "description": "Nest blocks with composite, build modal-dialog and embedded-table patterns, then declare + apply the finished ViewSpec to an org isomorphically over REST / CLI / MCP via view_specs.declare. Full JSON + ASCII layout + the cross-transport apply path."
+    }
+  ]
+}

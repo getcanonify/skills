@@ -1,0 +1,37 @@
+{
+  "name": "canonify",
+  "description": "How to operate Canonify declaratively. Read SKILL.md first, then use the resources to deep-dive on a specific declaration verb, the handler DSL, or the error-code contract.",
+  "version": "1.0.0",
+  "resources": [
+    {
+      "path": "resources/declaring-tables.md",
+      "title": "Declaring tables",
+      "description": "Use schema.propose_migration to create tables. Auto-CRUD synthesises the default ObjectType + create/read/update/delete/list actions from the table shape."
+    },
+    {
+      "path": "resources/declaring-objecttypes.md",
+      "title": "Declaring ObjectTypes",
+      "description": "Use catalog.refine_object_type to narrow string columns to enums, surface FK links, set on_delete cascade, and override hidden columns."
+    },
+    {
+      "path": "resources/declaring-state-machines.md",
+      "title": "Declaring StateMachines",
+      "description": "Use state_machines.register to bind a Phase 18.5 FSM to an ObjectType enum property. Transitions name the Action that drives them; on_enter/on_exit hooks enqueue follow-up actions."
+    },
+    {
+      "path": "resources/declaring-actions.md",
+      "title": "Declaring custom ActionTypes",
+      "description": "Use actions.declare to register a custom multi-step ActionType. The handler is a JSON DSL — typed CRUD steps over ObjectTypes glued by the $ref grammar — executed inside the runtime's tx + audit + outbox + FSM frame."
+    },
+    {
+      "path": "resources/handler-dsl-cookbook.md",
+      "title": "Handler DSL cookbook",
+      "description": "Copy-paste-ready handler examples — simple update, multi-table atomic (lead.convert), returns-block patterns. Every example decodes cleanly against the Phase 17.5 HandlerDsl effect/Schema."
+    },
+    {
+      "path": "resources/error-codes.md",
+      "title": "Error codes",
+      "description": "Every ActionDomainError kind, when it fires, the agent's recovery hint, and how the envelope's error field renders it."
+    }
+  ]
+}
