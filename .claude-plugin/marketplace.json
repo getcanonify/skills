@@ -1,0 +1,21 @@
+{
+  "name": "@canonify/skills",
+  "metadata": {
+    "pluginRoot": "."
+  },
+  "plugins": [
+    {
+      "name": "canonify-skills",
+      "source": ".",
+      "skills": [
+        "./canonify",
+        "./canonify-app-authoring",
+        "./canonify-esign-sender",
+        "./canonify-isomorphism",
+        "./canonify-objects-actions",
+        "./canonify-scenarios",
+        "./canonify-viewspecs"
+      ]
+    }
+  ]
+}

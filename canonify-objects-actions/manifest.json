@@ -1,0 +1,37 @@
+{
+  "name": "canonify-objects-actions",
+  "description": "Deep-dive reference + tutorial for declaring ObjectTypes and ActionTypes in Canonify. Covers typed object shape (property kinds, enums, links, cardinality, on_delete), property visibility for the auth/read context, auto-CRUD overrides, and ActionType nuances — idempotency postures, governance, transition markers, and handler-DSL gotchas — with copy-paste recipes that decode against the live effect/Schema validators. Read after the base `canonify` skill.",
+  "version": "1.0.0",
+  "resources": [
+    {
+      "path": "resources/object-property-types.md",
+      "title": "Object property types",
+      "description": "The property kinds (mapped / derived / computed), the seven PropertyTypes, enum narrowing rules, and nullable tightening — what catalog.refine_object_type accepts and why the validator rejects a narrowing."
+    },
+    {
+      "path": "resources/object-links-and-cardinality.md",
+      "title": "Object links & cardinality",
+      "description": "Declaring typed links between ObjectTypes: target, via (the FK column on the target), cardinality one|many, and the on_delete referential policy (restrict | cascade | set_null) honoured by every typed delete."
+    },
+    {
+      "path": "resources/object-visibility.md",
+      "title": "Object property visibility",
+      "description": "The hidden flag and the confidential ObjectType marker — how a column is surfaced or withheld from the typed read shape, how confidential types default-deny without a grant, and how access shows up in the audit trail."
+    },
+    {
+      "path": "resources/actions-input-governance.md",
+      "title": "Action input & governance",
+      "description": "The actions.declare envelope around a handler: the JSON input descriptor (types, enum, optional, format), governance (allowed_principals, requires_approval, requires_approval_when), idempotency postures, and the transition marker."
+    },
+    {
+      "path": "resources/actions-handler-patterns.md",
+      "title": "Action handler patterns",
+      "description": "Copy-paste handler-DSL recipes: read-then-update, multi-table atomic insert with returns, find-or-create via read_optional, assert preconditions, read_aggregate, arithmetic + date expressions, when-guards, and on_fail — plus the gotchas the typecheck pass rejects."
+    },
+    {
+      "path": "resources/esign-actions.md",
+      "title": "E-signature actions",
+      "description": "The built-in e-signature action surface you invoke (not declare): signature_request.create/send/view/sign/decline, signature.verify/certificate, the multi-signer signature_envelope.create/send/countersign/download/my_pending_countersigns/decline/void, and member_signature.set/get — their inputs, the request/envelope status enums + parts_frozen_when, consent + link_token persistArgs redaction + server-derived RequestContext evidence, and the terminal decline/void lifecycle."
+    }
+  ]
+}
