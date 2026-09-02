@@ -1,0 +1,17 @@
+{
+  "name": "canonify-domain-modelling",
+  "description": "The four obligations every Canonify domain model must meet, each stated as a rule with a worked before/after and the coherence-audit code that fires when you break it: reuse the canonical object instead of retyping its name into text columns (C1-shadow-entity), declare the upward link over every FK column (C2-unanchored), check the platform catalog before modelling a capability it already ships (C13-primitive-dup), and model time and money as effective-dated append-only rows with snapshotted settlements and integer minor units (C10-float-money). The other skills teach the mechanics; this one states what is obligatory. Read after the base `canonify` skill and before your first migration.",
+  "version": "1.0.0",
+  "resources": [
+    {
+      "path": "resources/pricing-worked-example.md",
+      "title": "Pricing, end to end",
+      "description": "Obligation 4 as one continuous build: effective-dated list-price and customer-override tables with half-open intervals and an open-end sentinel, the anchored ObjectType refinements, the append-only reprice action (close + insert in one transaction), two-case resolution by specificity with basis-point percentages, the settlement action that snapshots the resolved amount plus its back-reference, and the draft/sealed billing report with forward-only adjustment lines."
+    },
+    {
+      "path": "resources/anti-patterns.md",
+      "title": "Anti-patterns — the shapes to recognise",
+      "description": "Ten wrong shapes found in a real running Canon: the shadow entity, the unanchored child, the re-implemented primitive, float money, the mutable price, the collapsed zero, $now as the resolution date, the live report, two models for one concept, and the rules engine built for two cases. Each with what it costs, the audit code it trips, and the migration out of it."
+    }
+  ]
+}

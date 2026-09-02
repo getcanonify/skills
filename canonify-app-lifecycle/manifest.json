@@ -1,0 +1,6 @@
+{
+  "name": "canonify-app-lifecycle",
+  "description": "When to stop adding surface. The five lifecycle rules for a Canonify canon: take one app to a real 1.0 before starting the next, define 1.0 as three to five falsifiable conditions (usually a replay of a closed period, not a live parallel run against a system users keep editing), park unfinished work out of the app nav instead of deleting it, clear the coherence bar (C5-orphan-view, C6-demo-artefact, C7-view-sprawl, C8-dead-objecttype, C9-action-naming) before calling anything done, and verify every nav or ViewSpec change in the rendered app rather than in a test suite. Read when you are handed a brief bigger than one app, or before you declare your second app.",
+  "version": "1.0.0",
+  "resources": []
+}
