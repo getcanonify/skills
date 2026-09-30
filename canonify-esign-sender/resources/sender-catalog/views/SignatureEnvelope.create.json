@@ -1,0 +1,18 @@
+{
+  "definition": {
+    "icon": "file-signature",
+    "object_type": "signature_envelope",
+    "spec": {
+      "actionForm": {
+        "action": "signature_envelope.create",
+        "submitLabel": "Send for signature"
+      },
+      "title": "New agreement",
+      "type": "panel"
+    },
+    "title": "New agreement"
+  },
+  "managed_by": "managed",
+  "name": "SignatureEnvelope.create",
+  "source_ref": "canonify-esign-sender@1"
+}

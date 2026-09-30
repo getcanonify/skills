@@ -1,0 +1,13 @@
+{
+  "bundle_version": 1,
+  "counts": {
+    "actions": 0,
+    "apps": 0,
+    "forms": 0,
+    "object_types": 0,
+    "policies": 3,
+    "schema": 0,
+    "state_machines": 0,
+    "views": 2
+  }
+}
