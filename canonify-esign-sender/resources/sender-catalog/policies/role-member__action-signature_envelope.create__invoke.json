@@ -1,0 +1,17 @@
+{
+  "definition": {
+    "columns": null,
+    "operations": ["invoke"],
+    "resource": {
+      "action": "signature_envelope.create"
+    },
+    "row_filter": null,
+    "subject": {
+      "kind": "role",
+      "role": "member"
+    }
+  },
+  "managed_by": "managed",
+  "name": "role-member__action-signature_envelope.create__invoke",
+  "source_ref": "canonify-esign-sender@1"
+}
