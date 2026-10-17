@@ -1,0 +1,34 @@
+{
+  "name": "Job.board",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Board",
+    "icon": "kanban",
+    "object_type": "job",
+    "spec": {
+      "type": "board",
+      "source": {
+        "objectType": "job",
+        "filter": { "status": { "in": ["booked", "in_progress", "ready", "collected"] } },
+        "sort": "promised_at"
+      },
+      "groupBy": "status",
+      "overdue": "is_overdue",
+      "lanes": { "collected": { "sort": "-collected_at", "limit": 5 } },
+      "columns": [
+        { "ref": "title", "label": "Job" },
+        "customer_id",
+        { "ref": "promised_at", "label": "Promised" },
+        "priority"
+      ],
+      "rowActions": [
+        "job.start",
+        "job.mark_ready",
+        { "action": "job.collect", "label": "Hand over" },
+        { "action": "job.cancel", "label": "Cancel" }
+      ],
+      "createAction": "job.book"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Job.record",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Job",
+    "icon": "wrench",
+    "object_type": "job",
+    "spec": {
+      "type": "detail",
+      "source": { "objectType": "job" },
+      "header": {
+        "title": "title",
+        "status": "status",
+        "metrics": ["quote", "quote_incl_vat", "revenue"]
+      },
+      "properties": [
+        "customer_id",
+        "bike_id",
+        "priority",
+        "promised_at",
+        "collected_at"
+      ]
+    }
+  }
+}

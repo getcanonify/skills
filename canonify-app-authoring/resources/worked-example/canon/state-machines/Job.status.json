@@ -1,0 +1,26 @@
+{
+  "name": "Job.status",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "kind": "state_machine",
+    "track": "customer",
+    "name": "Job.status",
+    "objectType": "job",
+    "property": "status",
+    "initial": "booked",
+    "states": {
+      "booked": { "label": "Booked" },
+      "in_progress": { "label": "In progress" },
+      "ready": { "label": "Ready for pickup" },
+      "collected": { "label": "Collected", "terminal": true },
+      "cancelled": { "label": "Cancelled", "terminal": true }
+    },
+    "transitions": [
+      { "via": "job.start", "from": ["booked"], "to": "in_progress" },
+      { "via": "job.mark_ready", "from": ["in_progress"], "to": "ready" },
+      { "via": "job.collect", "from": ["ready"], "to": "collected" },
+      { "via": "job.cancel", "from": ["booked", "in_progress", "ready"], "to": "cancelled" }
+    ]
+  }
+}

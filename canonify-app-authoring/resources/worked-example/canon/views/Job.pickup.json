@@ -1,0 +1,23 @@
+{
+  "name": "Job.pickup",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Pickup",
+    "icon": "inbox",
+    "object_type": "job",
+    "spec": {
+      "type": "queue",
+      "title": "Ready for pickup",
+      "why": "Bikes waiting for their owner — longest-promised first. Hand over to clear.",
+      "source": { "objectType": "job", "filter": { "status": "ready" } },
+      "order": [{ "field": "promised_at", "dir": "asc" }],
+      "buckets": { "from": "promised_at" },
+      "row": { "title": "title", "subtitle": "customer_id" },
+      "actions": {
+        "primary": { "action": "job.collect", "label": "Hand over", "key": "Enter" }
+      },
+      "empty": { "title": "Nothing waiting", "body": "Every finished bike has been collected." }
+    }
+  }
+}

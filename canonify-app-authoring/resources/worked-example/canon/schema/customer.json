@@ -1,0 +1,4 @@
+{
+  "table": "customer",
+  "sql": "CREATE TABLE customer (\n  id          TEXT PRIMARY KEY,\n  name        TEXT NOT NULL,\n  email       TEXT NOT NULL,\n  phone       TEXT,\n  membership  TEXT NOT NULL DEFAULT 'none',\n  created_at  TEXT NOT NULL,\n  updated_at  TEXT NOT NULL\n)"
+}

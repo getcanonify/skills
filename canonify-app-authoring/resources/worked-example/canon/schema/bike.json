@@ -1,0 +1,4 @@
+{
+  "table": "bike",
+  "sql": "CREATE TABLE bike (\n  id          TEXT PRIMARY KEY,\n  customer_id TEXT NOT NULL,\n  make        TEXT NOT NULL,\n  model       TEXT NOT NULL,\n  kind        TEXT NOT NULL DEFAULT 'city',\n  created_at  TEXT NOT NULL,\n  updated_at  TEXT NOT NULL\n)"
+}

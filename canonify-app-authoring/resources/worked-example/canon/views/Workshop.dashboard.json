@@ -1,0 +1,109 @@
+{
+  "name": "Workshop.dashboard",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Dashboard",
+    "icon": "layout-dashboard",
+    "object_type": "job",
+    "spec": {
+      "type": "composite",
+      "layout": "stack",
+      "children": [
+        {
+          "type": "composite",
+          "layout": "grid",
+          "children": [
+            {
+              "type": "metric",
+              "label": "Open jobs",
+              "source": {
+                "objectType": "job",
+                "aggregate": { "op": "count" },
+                "filter": { "status": { "in": ["booked", "in_progress", "ready"] } }
+              }
+            },
+            {
+              "type": "metric",
+              "label": "Ready for pickup",
+              "source": {
+                "objectType": "job",
+                "aggregate": { "op": "count" },
+                "filter": { "status": "ready" }
+              }
+            },
+            {
+              "type": "metric",
+              "label": "Overdue",
+              "source": {
+                "objectType": "job",
+                "aggregate": { "op": "count" },
+                "filter": { "is_overdue": true }
+              }
+            },
+            {
+              "type": "metric",
+              "label": "Quoted, not yet collected",
+              "source": {
+                "objectType": "job",
+                "aggregate": { "op": "sum", "property": "quote" },
+                "filter": { "status": { "in": ["booked", "in_progress", "ready"] } }
+              }
+            },
+            {
+              "type": "metric",
+              "label": "Revenue this month",
+              "source": {
+                "objectType": "job",
+                "aggregate": { "op": "sum", "property": "revenue" },
+                "groupBy": "collected_at@month"
+              },
+              "window": { "last": 6 },
+              "compare": { "offset": { "period": "month", "periods": 1 } }
+            }
+          ]
+        },
+        {
+          "type": "chart",
+          "title": "Jobs by status",
+          "source": {
+            "objectType": "job",
+            "aggregate": { "op": "count" },
+            "groupBy": "status"
+          }
+        },
+        {
+          "type": "table",
+          "title": "Work by bike type",
+          "source": {
+            "objectType": "job",
+            "aggregate": { "op": "count" },
+            "groupBy": "bike.kind"
+          },
+          "columns": [
+            "bike.kind",
+            { "ref": "count", "label": "Jobs" },
+            { "ref": "sum:quote", "label": "Quoted" },
+            { "ref": "avg:quote", "label": "Average quote" }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Due next",
+          "source": {
+            "objectType": "job",
+            "filter": { "status": { "in": ["booked", "in_progress"] } },
+            "sort": "promised_at"
+          },
+          "columns": [
+            { "ref": "title", "label": "Job" },
+            "status",
+            "customer_id",
+            { "ref": "promised_at", "label": "Promised" }
+          ],
+          "page_size": 5
+        }
+      ]
+    }
+  }
+}

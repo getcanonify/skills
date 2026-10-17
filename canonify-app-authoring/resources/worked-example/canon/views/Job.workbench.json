@@ -1,0 +1,38 @@
+{
+  "name": "Job.workbench",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Workbench",
+    "icon": "wrench",
+    "object_type": "job",
+    "spec": {
+      "type": "queue",
+      "title": "Workbench",
+      "why": "Every open job, soonest promise first. Each row offers the one next step its state allows.",
+      "source": {
+        "objectType": "job",
+        "filter": { "status": { "in": ["booked", "in_progress", "ready"] } }
+      },
+      "order": [{ "field": "promised_at", "dir": "asc" }],
+      "urgency": { "from": "priority" },
+      "buckets": { "from": "promised_at" },
+      "row": {
+        "title": "title",
+        "subtitle": "customer_id",
+        "facts": [
+          { "value": "status", "label": "Status" },
+          { "value": "quote", "label": "Quote" }
+        ]
+      },
+      "actions": {
+        "primary": { "action": "job.start", "label": "Start", "key": "Enter" },
+        "secondary": [
+          { "action": "job.mark_ready", "label": "Mark ready" },
+          { "action": "job.collect", "label": "Hand over" }
+        ]
+      },
+      "empty": { "title": "Bench clear", "body": "No open jobs." }
+    }
+  }
+}

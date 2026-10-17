@@ -1,0 +1,44 @@
+{
+  "name": "customer",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "customer",
+    "description": "A workshop customer. Owns bikes and brings them in for repair jobs.",
+    "idPrefix": "cus",
+    "properties": {
+      "name": { "kind": "mapped", "column": "name", "type": "string", "label": "Name" },
+      "email": { "kind": "mapped", "column": "email", "type": "string", "label": "Email" },
+      "phone": { "kind": "mapped", "column": "phone", "type": "string", "label": "Phone", "nullable": true },
+      "membership": {
+        "kind": "mapped",
+        "column": "membership",
+        "type": "enum",
+        "label": "Membership",
+        "values": ["none", "club", "pro"],
+        "valueLabels": { "none": "None", "club": "Club", "pro": "Pro" },
+        "valueColors": { "none": "neutral", "club": "info", "pro": "cool" }
+      },
+      "created_at": { "kind": "mapped", "column": "created_at", "type": "timestamp", "label": "Customer since" }
+    },
+    "links": {
+      "bikes": { "target": "bike", "cardinality": "many", "via": "customer_id", "on_delete": "restrict" },
+      "jobs": { "target": "job", "cardinality": "many", "via": "customer_id", "on_delete": "restrict" }
+    },
+    "display": {
+      "entityKind": "Customer",
+      "entityKindPlural": "Customers",
+      "icon": "user",
+      "title": { "property": "name" },
+      "subtitle": { "property": "email" },
+      "statusProperty": "membership",
+      "formFields": ["name", "email", "phone", "membership"],
+      "primaryProperties": ["name", "membership", "email", "phone"],
+      "searchable": ["name", "email", "phone"],
+      "actions": {
+        "customer.create": { "label": "New customer" },
+        "customer.update": { "label": "Edit", "emphasis": "secondary" }
+      }
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "name": "job.book",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "job.book",
+    "description": "Book a repair job on a customer's bike. The job's customer is read from the bike, and a bike that belongs to another customer is refused, so the job and the bike can never disagree.",
+    "object_type": "job",
+    "input": {
+      "customer_id": { "type": "string", "prefix": "cus_" },
+      "bike_id": { "type": "string", "prefix": "bik_" },
+      "title": { "type": "string", "min": 1 },
+      "promised_at": { "type": "string", "format": "iso8601" },
+      "priority": { "type": "string", "enum": ["normal", "rush"] },
+      "quote": { "type": "money", "currency": "DKK", "min": 0 }
+    },
+    "governance": {
+      "requires_approval": false,
+      "allowed_principals": ["user", "agent", "service_account"]
+    },
+    "idempotency": "per-key",
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "bike", "where": { "id": "$input.bike_id" }, "as": "bike" },
+        {
+          "op": "assert",
+          "when": { "ref": "$bike.customer_id", "eq": "$input.customer_id" },
+          "else": { "code": "VALIDATION", "message": "That bike belongs to another customer.", "field": "bike_id" }
+        },
+        {
+          "op": "insert",
+          "object": "job",
+          "values": {
+            "bike_id": "$bike.id",
+            "customer_id": "$bike.customer_id",
+            "title": "$input.title",
+            "promised_at": "$input.promised_at",
+            "priority": "$input.priority",
+            "quote": "$input.quote"
+          },
+          "as": "job"
+        }
+      ],
+      "returns": { "job_id": "$job.id" }
+    },
+    "presentation": {
+      "label": "Book a job",
+      "description": "Book a bike in for repair.",
+      "icon": "calendar-plus",
+      "formFields": ["customer_id", "bike_id", "title", "promised_at", "priority", "quote"],
+      "inputLabels": {
+        "customer_id": "Customer",
+        "bike_id": "Bike",
+        "title": "What needs doing",
+        "promised_at": "Promised for",
+        "priority": "Priority",
+        "quote": "Quote"
+      },
+      "inputValueLabels": { "priority": { "normal": "Normal", "rush": "Rush" } },
+      "inputDefaults": { "priority": "normal" },
+      "inputFilters": { "bike_id": { "customer_id": "$input.customer_id" } },
+      "success": "Job booked."
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "job.cancel",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "job.cancel",
+    "description": "Cancel a job that has not been collected.",
+    "object_type": "job",
+    "input": { "job_id": { "type": "string", "prefix": "job_" } },
+    "governance": {
+      "requires_approval": false,
+      "allowed_principals": ["user", "agent", "service_account"]
+    },
+    "idempotency": "none",
+    "transition": {
+      "state_machine": "Job.status",
+      "from": ["booked", "in_progress", "ready"],
+      "to": "cancelled"
+    },
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "job", "where": { "id": "$input.job_id" }, "as": "job" }
+      ],
+      "returns": { "job_id": "$job.id" }
+    },
+    "presentation": {
+      "label": "Cancel job",
+      "emphasis": "secondary",
+      "destructive": true,
+      "icon": "x",
+      "confirm": "Cancel this job?",
+      "success": "Job cancelled."
+    }
+  }
+}

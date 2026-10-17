@@ -1,0 +1,40 @@
+{
+  "name": "bike",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "bike",
+    "description": "A customer's bicycle. Belongs to exactly one customer.",
+    "idPrefix": "bik",
+    "properties": {
+      "customer_id": { "kind": "mapped", "column": "customer_id", "type": "string", "label": "Owner" },
+      "make": { "kind": "mapped", "column": "make", "type": "string", "label": "Make" },
+      "model": { "kind": "mapped", "column": "model", "type": "string", "label": "Model" },
+      "kind": {
+        "kind": "mapped",
+        "column": "kind",
+        "type": "enum",
+        "label": "Type",
+        "values": ["road", "gravel", "mtb", "city", "cargo"],
+        "valueLabels": { "road": "Road", "gravel": "Gravel", "mtb": "MTB", "city": "City", "cargo": "Cargo" }
+      }
+    },
+    "links": {
+      "customer": { "target": "customer", "cardinality": "one", "via": "customer_id", "fk_on": "source" },
+      "jobs": { "target": "job", "cardinality": "many", "via": "bike_id", "on_delete": "restrict" }
+    },
+    "display": {
+      "entityKind": "Bike",
+      "entityKindPlural": "Bikes",
+      "icon": "bike",
+      "title": { "template": "{make} {model}" },
+      "subtitle": { "derived": { "via": "customer_id" } },
+      "formFields": ["customer_id", "make", "model", "kind"],
+      "primaryProperties": ["make", "model", "kind", "customer_id"],
+      "actions": {
+        "bike.create": { "label": "Add bike" },
+        "bike.update": { "label": "Edit bike" }
+      }
+    }
+  }
+}

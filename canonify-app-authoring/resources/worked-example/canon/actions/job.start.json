@@ -1,0 +1,29 @@
+{
+  "name": "job.start",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "job.start",
+    "description": "Put the bike on a stand and start the work.",
+    "object_type": "job",
+    "input": { "job_id": { "type": "string", "prefix": "job_" } },
+    "governance": {
+      "requires_approval": false,
+      "allowed_principals": ["user", "agent", "service_account"]
+    },
+    "idempotency": "none",
+    "transition": { "state_machine": "Job.status", "from": ["booked"], "to": "in_progress" },
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "job", "where": { "id": "$input.job_id" }, "as": "job" }
+      ],
+      "returns": { "job_id": "$job.id" }
+    },
+    "presentation": {
+      "label": "Start work",
+      "emphasis": "primary",
+      "icon": "play",
+      "success": "Work started."
+    }
+  }
+}

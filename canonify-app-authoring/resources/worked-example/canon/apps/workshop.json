@@ -1,0 +1,22 @@
+{
+  "name": "workshop",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "slug": "workshop",
+    "name": "Workshop",
+    "icon": "bike",
+    "defaultView": "Workshop.dashboard",
+    "nav": [
+      { "view": "Workshop.dashboard" },
+      { "view": "Job.workbench" },
+      {
+        "view": "Job.pickup",
+        "count": { "objectType": "job", "filter": { "status": "ready" } }
+      },
+      { "view": "Job.board" },
+      { "view": "Job.list" },
+      { "view": "Customer.directory" }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "job.mark_ready",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "job.mark_ready",
+    "description": "The work is done; the bike is ready for the customer to pick up.",
+    "object_type": "job",
+    "input": { "job_id": { "type": "string", "prefix": "job_" } },
+    "governance": {
+      "requires_approval": false,
+      "allowed_principals": ["user", "agent", "service_account"]
+    },
+    "idempotency": "none",
+    "transition": { "state_machine": "Job.status", "from": ["in_progress"], "to": "ready" },
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "job", "where": { "id": "$input.job_id" }, "as": "job" }
+      ],
+      "returns": { "job_id": "$job.id" }
+    },
+    "presentation": {
+      "label": "Mark ready",
+      "emphasis": "primary",
+      "icon": "check",
+      "success": "Ready for pickup."
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "name": "job",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "job",
+    "description": "A repair job on one bike for one customer. Job.status is FSM-governed. quote and revenue are integer øre (DKK minor units); revenue is snapshotted from quote when the bike is collected.",
+    "idPrefix": "job",
+    "defaults": { "create": false, "delete": false },
+    "properties": {
+      "bike_id": { "kind": "mapped", "column": "bike_id", "type": "string", "label": "Bike" },
+      "customer_id": { "kind": "mapped", "column": "customer_id", "type": "string", "label": "Customer" },
+      "title": { "kind": "mapped", "column": "title", "type": "string", "label": "Job" },
+      "status": {
+        "kind": "mapped",
+        "column": "status",
+        "type": "enum",
+        "label": "Status",
+        "values": ["booked", "in_progress", "ready", "collected", "cancelled"],
+        "valueLabels": {
+          "booked": "Booked",
+          "in_progress": "In progress",
+          "ready": "Ready for pickup",
+          "collected": "Collected",
+          "cancelled": "Cancelled"
+        },
+        "valueColors": {
+          "booked": "neutral",
+          "in_progress": "info",
+          "ready": "good",
+          "collected": "neutral",
+          "cancelled": "hot"
+        }
+      },
+      "priority": {
+        "kind": "mapped",
+        "column": "priority",
+        "type": "enum",
+        "label": "Priority",
+        "values": ["normal", "rush"],
+        "valueLabels": { "normal": "Normal", "rush": "Rush" },
+        "valueColors": { "normal": "neutral", "rush": "hot" }
+      },
+      "promised_at": { "kind": "mapped", "column": "promised_at", "type": "timestamp", "label": "Promised" },
+      "quote": { "kind": "mapped", "column": "quote", "type": "money", "currency": "DKK", "label": "Quote" },
+      "revenue": { "kind": "mapped", "column": "revenue", "type": "money", "currency": "DKK", "label": "Revenue", "nullable": true },
+      "collected_at": { "kind": "mapped", "column": "collected_at", "type": "timestamp", "label": "Collected", "nullable": true },
+      "quote_incl_vat": {
+        "kind": "derived",
+        "type": "money",
+        "currency": "DKK",
+        "label": "Quote incl. VAT",
+        "expression": "CAST(ROUND(job.quote * 1.25) AS INTEGER)"
+      },
+      "is_overdue": {
+        "kind": "derived",
+        "type": "boolean",
+        "label": "Overdue",
+        "expression": "CASE WHEN job.status IN ('booked', 'in_progress') AND job.promised_at < strftime('%Y-%m-%dT%H:%M:%fZ', 'now') THEN 1 ELSE 0 END"
+      }
+    },
+    "links": {
+      "bike": { "target": "bike", "cardinality": "one", "via": "bike_id", "fk_on": "source" },
+      "customer": { "target": "customer", "cardinality": "one", "via": "customer_id", "fk_on": "source" }
+    },
+    "display": {
+      "entityKind": "Job",
+      "entityKindPlural": "Jobs",
+      "icon": "wrench",
+      "title": { "property": "title" },
+      "subtitle": { "derived": { "via": "customer_id" } },
+      "statusProperty": "status",
+      "formFields": ["title", "priority", "promised_at", "quote"],
+      "primaryProperties": ["title", "status", "customer_id", "bike_id", "promised_at", "quote"],
+      "searchable": ["title", "status", "priority"],
+      "actions": {
+        "job.update": { "label": "Edit", "emphasis": "secondary" }
+      }
+    }
+  }
+}

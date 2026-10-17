@@ -1,0 +1,164 @@
+name: workshop-loop
+description: >
+  The worked example's business loop, end to end through the public surface:
+  seed customers, bikes and one finished job with objects.import, book a job,
+  walk it through the Job.status state machine, and check the money snapshot
+  and the FSM guard.
+
+principals:
+  agent:
+    kind: agent
+    id: agt_workshop_example
+    org_id: org_test
+
+steps:
+  # Seed with objects.import, not one create per row: one atomic, audited call
+  # per batch of up to 500 rows. Rows keep the ids you give them (handy for ids
+  # from a system you migrate from), so children can name their parents —
+  # import parents first. Omit `id` and the platform generates one from the
+  # ObjectType's idPrefix (cus_…, bik_…).
+  - action: objects.import
+    input:
+      object_type: customer
+      rows:
+        - { id: cus_ada, name: Ada Jensen, email: ada@example.com, phone: '+45 12 34 56 78', membership: club }
+        - { id: cus_ben, name: Ben Holm, email: ben@example.com }
+    expect:
+      data: { object_type: customer, imported: 2, skipped: 0 }
+
+  - action: objects.import
+    input:
+      object_type: bike
+      rows:
+        - { id: bik_ada_1, customer_id: cus_ada, make: Ribble, model: Gravel AL, kind: gravel }
+        - { id: bik_ben_1, customer_id: cus_ben, make: Brompton, model: C Line }
+    expect:
+      data: { imported: 2 }
+
+  # History loads as history: a job finished last year arrives `collected`,
+  # with its own created_at. job.book could not do that — a new row starts in
+  # the machine's initial state — and no hook or reaction runs for it.
+  - action: objects.import
+    input:
+      object_type: job
+      rows:
+        - id: job_2025_0412
+          customer_id: cus_ben
+          bike_id: bik_ben_1
+          title: Winter service
+          status: collected
+          promised_at: '2025-11-03T15:00:00.000Z'
+          quote: 45000
+          revenue: 45000
+          collected_at: '2025-11-03T16:10:00.000Z'
+          created_at: '2025-11-01T08:12:00.000Z'
+    expect:
+      data: { imported: 1 }
+
+  - read: objects.get
+    input: { type: job, id: job_2025_0412 }
+    expect:
+      data: { status: collected, created_at: '2025-11-01T08:12:00.000Z' }
+
+  # The handler's assert owns the invariant the form's bike picker only
+  # scopes (presentation.inputFilters): a job is booked on the customer's
+  # own bike, or not at all.
+  - action: job.book
+    input:
+      customer_id: cus_ben
+      bike_id: bik_ada_1
+      title: Puncture
+      promised_at: '2026-10-19T12:00:00.000Z'
+      priority: normal
+      quote: 15000
+    expect:
+      error: { code: VALIDATION }
+
+  # A money input is integer minor units on every surface: 125000 øre is
+  # DKK 1,250.00 (the input declares its currency, DKK). A fractional amount
+  # is refused, never rounded.
+  - action: job.book
+    input:
+      customer_id: cus_ada
+      bike_id: bik_ada_1
+      title: Full service and new chain
+      promised_at: '2026-10-20T16:00:00.000Z'
+      priority: rush
+      quote: 125000
+    bind: booked
+    expect:
+      data: { job_id: { matches: '^job_' } }
+
+  - read: objects.get
+    input: { type: job, id: $booked.job_id }
+    expect:
+      data:
+        status: booked
+        customer_id: cus_ada
+        quote: 125000
+        revenue: null
+
+  # The FSM guard: collecting a job that is not ready is refused.
+  - action: job.collect
+    input: { job_id: $booked.job_id }
+    expect:
+      error: { code: INVALID_STATE }
+
+  - action: job.start
+    input: { job_id: $booked.job_id }
+  - action: job.mark_ready
+    input: { job_id: $booked.job_id }
+  - action: job.collect
+    input: { job_id: $booked.job_id }
+
+  # collect stamped collected_at and snapshotted the quote as revenue; the
+  # runtime wrote the state column (the handler never writes `status`).
+  - read: objects.get
+    input: { type: job, id: $booked.job_id }
+    expect:
+      data:
+        status: collected
+        revenue: 125000
+        collected_at: { matches: '^20' }
+
+  # Every surface reads the same numbers: one job, collected, for this customer.
+  - read: objects.navigate
+    input: { type: customer, id: cus_ada, link: jobs }
+    expect:
+      data: { length: 1 }
+
+  # An aggregate names its unit: the sum is still øre, of DKK — the same
+  # minor units a record read returns, so every view formats it as DKK. The
+  # imported history counts like any other collected job: 450 + 1,250 kr.
+  - read: objects.aggregate
+    input: { type: job, op: sum, property: revenue, filter: { status: collected } }
+    expect:
+      data: { value: 170000, unit: { type: money, currency: DKK } }
+
+  # A terminal state is terminal: a collected job cannot be cancelled.
+  - action: job.cancel
+    input: { job_id: $booked.job_id }
+    expect:
+      error: { code: INVALID_STATE }
+
+  # Derived properties read like columns: the VAT-inclusive quote is computed
+  # in øre and carries DKK; a collected job is never overdue.
+  - read: objects.get
+    input: { type: job, id: job_2025_0412 }
+    expect:
+      data: { quote_incl_vat: 56250, is_overdue: false }
+
+  # An open job whose promise has passed is overdue, and a derived boolean
+  # filters an aggregate like a stored one — the dashboard's Overdue tile.
+  - action: job.book
+    input:
+      customer_id: cus_ben
+      bike_id: bik_ben_1
+      title: Brake bleed
+      promised_at: '2025-06-02T09:00:00.000Z'
+      priority: normal
+      quote: 30000
+  - read: objects.aggregate
+    input: { type: job, op: count, filter: { is_overdue: true } }
+    expect:
+      data: { value: 1 }

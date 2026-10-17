@@ -1,0 +1,49 @@
+{
+  "name": "Customer.directory",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Customers",
+    "icon": "users",
+    "object_type": "customer",
+    "spec": {
+      "type": "composite",
+      "children": [
+        {
+          "type": "table",
+          "title": "Customers",
+          "source": { "objectType": "customer", "sort": "name" },
+          "columns": [
+            { "ref": "name", "sortable": true },
+            "membership",
+            "email",
+            { "ref": "jobs.count", "label": "Jobs" },
+            { "ref": "jobs.sum:revenue", "label": "Revenue" }
+          ],
+          "presets": [
+            { "label": "Club", "filter": { "membership": "club" } },
+            { "label": "Pro", "filter": { "membership": "pro" } }
+          ]
+        },
+        {
+          "type": "detail",
+          "source": { "objectType": "customer" },
+          "header": {
+            "title": "name",
+            "subtitle": "{email} · {phone}",
+            "status": "membership",
+            "metrics": [
+              { "ref": "jobs.count", "label": "Jobs" },
+              { "ref": "jobs.sum:revenue", "label": "Revenue" }
+            ]
+          },
+          "properties": ["email", "phone", "membership", "created_at"],
+          "links": [
+            { "link": "jobs", "as": "tab", "label": "Jobs", "sort": "-promised_at" },
+            { "link": "bikes", "as": "tab", "label": "Bikes" }
+          ]
+        }
+      ]
+    }
+  }
+}

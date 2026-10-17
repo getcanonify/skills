@@ -1,0 +1,31 @@
+{
+  "name": "Job.list",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Jobs",
+    "icon": "list",
+    "object_type": "job",
+    "spec": {
+      "type": "table",
+      "source": { "objectType": "job", "sort": "promised_at" },
+      "columns": [
+        { "ref": "title", "label": "Job", "sortable": true },
+        "status",
+        "customer_id",
+        "bike_id",
+        { "ref": "promised_at", "label": "Promised", "sortable": true },
+        "priority",
+        "quote"
+      ],
+      "presets": [
+        { "label": "Open", "filter": { "status": { "in": ["booked", "in_progress", "ready"] } } },
+        { "label": "Ready for pickup", "filter": { "status": "ready" } },
+        { "label": "Rush", "filter": { "priority": "rush" } }
+      ],
+      "rowActions": ["job.start", "job.mark_ready", { "action": "job.collect", "label": "Hand over" }],
+      "totals": ["quote"],
+      "page_size": 25
+    }
+  }
+}

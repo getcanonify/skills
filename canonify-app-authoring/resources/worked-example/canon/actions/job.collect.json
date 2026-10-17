@@ -1,0 +1,36 @@
+{
+  "name": "job.collect",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "job.collect",
+    "description": "The customer picked the bike up and paid. Stamps collected_at and snapshots the quote as the job's revenue.",
+    "object_type": "job",
+    "input": { "job_id": { "type": "string", "prefix": "job_" } },
+    "governance": {
+      "requires_approval": false,
+      "allowed_principals": ["user", "agent", "service_account"]
+    },
+    "idempotency": "none",
+    "transition": { "state_machine": "Job.status", "from": ["ready"], "to": "collected" },
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "job", "where": { "id": "$input.job_id" }, "as": "job" },
+        {
+          "op": "update",
+          "object": "job",
+          "where": { "id": "$job.id" },
+          "set": { "collected_at": "$now", "revenue": "$job.quote" }
+        }
+      ],
+      "returns": { "job_id": "$job.id" }
+    },
+    "presentation": {
+      "label": "Hand over",
+      "emphasis": "primary",
+      "icon": "hand-helping",
+      "confirm": "Hand the bike back to the customer and record the payment?",
+      "success": "Bike handed over."
+    }
+  }
+}

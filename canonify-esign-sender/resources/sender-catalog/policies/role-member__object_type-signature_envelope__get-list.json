@@ -1,0 +1,17 @@
+{
+  "definition": {
+    "columns": null,
+    "operations": ["get", "list"],
+    "resource": {
+      "object_type": "signature_envelope"
+    },
+    "row_filter": "creator_account_id = :principal.id",
+    "subject": {
+      "kind": "role",
+      "role": "member"
+    }
+  },
+  "managed_by": "managed",
+  "name": "role-member__object_type-signature_envelope__get-list",
+  "source_ref": "canonify-esign-sender@1"
+}
