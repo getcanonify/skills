@@ -1,0 +1,102 @@
+name: own-claims
+description: >
+  Access in one loop: a member lists, counts and navigates only their own
+  claims and claim lines; a finance member reads every claim (grants union),
+  but only inside their own office (a restrictive wall no grant widens); a
+  member outside the finance group is refused claim.approve, and a finance
+  member approves.
+
+principals:
+  owner:
+    kind: user
+    id: usr_owner
+    org_id: org_test
+  ana:
+    kind: user
+    id: usr_ana
+    org_id: org_test
+    roles: [member]
+    groups: [cph]
+  ben:
+    kind: user
+    id: usr_ben
+    org_id: org_test
+    roles: [member]
+    groups: [aar]
+  fay:
+    kind: user
+    id: usr_fay
+    org_id: org_test
+    roles: [member]
+    groups: [finance, cph]
+
+steps:
+  # A member runs a custom action (the member default allows invoke):
+  # submitted_by is the caller, set by the handler.
+  - action: claim.submit
+    principal: ana
+    input: { title: Train fare, amount: 42000, office: cph }
+    bind: anas
+  - action: claim.submit
+    principal: ben
+    input: { title: Hotel, amount: 98000, office: aar }
+    bind: bens
+
+  - action: objects.import
+    principal: owner
+    input:
+      object_type: claim_line
+      rows:
+        - { claim_id: $anas.claim_id, description: Copenhagen - Aarhus, amount: 42000 }
+        - { claim_id: $bens.claim_id, description: Two nights, amount: 98000 }
+    expect:
+      data: { imported: 2 }
+
+  # The row filter scopes every read verb.
+  - read: objects.list
+    principal: ana
+    input: { type: claim }
+    expect: { data: [{ title: Train fare, submitted_by: usr_ana }] }
+  - read: objects.list
+    principal: ana
+    input: { type: claim_line }
+    expect: { data: [{ description: Copenhagen - Aarhus }] }
+  - read: objects.aggregate
+    principal: ana
+    input: { type: claim, op: count }
+    expect: { value: 1 }
+  - read: objects.list
+    principal: owner
+    input: { type: claim }
+    expect: { data: { length: 2 } }
+
+  # fay's finance grant unions with the own-claims grant (every claim), and
+  # the office wall then keeps only Copenhagen: ana's claim, not ben's.
+  - read: objects.list
+    principal: fay
+    input: { type: claim }
+    expect: { data: [{ title: Train fare, office: cph }] }
+  - read: objects.aggregate
+    principal: fay
+    input: { type: claim, op: count }
+    expect: { value: 1 }
+
+  # The member default withholds the generated create.
+  - action: claim.create
+    principal: ana
+    input: { title: Taxi, amount: 1000, submitted_by: usr_ana, office: cph }
+    expect: { error: { code: FORBIDDEN } }
+
+  # claim.approve is decided as `manage`: refused without the finance grant.
+  - action: claim.approve
+    principal: ana
+    input: { claim_id: $anas.claim_id }
+    expect: { error: { code: FORBIDDEN } }
+  - action: claim.approve
+    principal: fay
+    input: { claim_id: $anas.claim_id }
+    expect: { data: { claim_id: $anas.claim_id } }
+  - read: objects.get
+    principal: owner
+    input: { type: claim, id: $anas.claim_id }
+    expect: { data: { status: approved } }

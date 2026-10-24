@@ -1,0 +1,49 @@
+name: deny-all
+description: >
+  The deny-all wall: a warehouse member reads no credit hold on any read verb
+  (a wall no row passes, `id = 'none'`), while a member outside the group
+  reads them all.
+
+principals:
+  owner:
+    kind: user
+    id: usr_owner
+    org_id: org_test
+  ana:
+    kind: user
+    id: usr_ana
+    org_id: org_test
+    roles: [member]
+    groups: [cph]
+  wes:
+    kind: user
+    id: usr_wes
+    org_id: org_test
+    roles: [member]
+    groups: [warehouse]
+
+steps:
+  - action: objects.import
+    principal: owner
+    input:
+      object_type: credit_hold
+      rows:
+        - { customer: Nordlys ApS, reason: Overdue 90 days }
+        - { customer: Fjord A/S, reason: Disputed invoice }
+    expect:
+      data: { imported: 2 }
+
+  - read: objects.list
+    principal: ana
+    input: { type: credit_hold }
+    expect: { data: { length: 2 } }
+
+  # The wall ANDs `id = 'none'` onto every read verb: no row passes.
+  - read: objects.list
+    principal: wes
+    input: { type: credit_hold }
+    expect: { data: { length: 0 } }
+  - read: objects.aggregate
+    principal: wes
+    input: { type: credit_hold, op: count }
+    expect: { value: 0 }

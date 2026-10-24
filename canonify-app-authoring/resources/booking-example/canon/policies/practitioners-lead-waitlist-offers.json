@@ -1,0 +1,11 @@
+{
+  "name": "practitioners-lead-waitlist-offers",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "group", "group": "practitioners" },
+    "resource": { "object_type": "waitlist_offer" },
+    "operations": ["get", "list", "navigate", "aggregate"],
+    "row_filter": "{\"via_link\": \"patient\", \"where\": \"lead_member_id = :principal.id\"}"
+  }
+}

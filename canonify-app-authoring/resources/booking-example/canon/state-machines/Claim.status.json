@@ -1,0 +1,22 @@
+{
+  "name": "Claim.status",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "kind": "state_machine",
+    "track": "customer",
+    "name": "Claim.status",
+    "objectType": "claim",
+    "property": "status",
+    "initial": "draft",
+    "states": {
+      "draft": { "label": "Draft", "meaning": "live" },
+      "submitted": { "label": "Submitted", "meaning": "live", "color": "cool" },
+      "partial": { "label": "Partial", "meaning": "terminal-good", "color": "warm", "terminal": true }
+    },
+    "transitions": [
+      { "via": "claim.submit", "from": ["draft"], "to": "submitted" },
+      { "via": "claim.decide_partial", "from": ["submitted"], "to": "partial" }
+    ]
+  }
+}

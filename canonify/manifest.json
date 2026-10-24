@@ -1,0 +1,12 @@
+{
+  "name": "canonify",
+  "description": "How to operate Canonify declaratively. SKILL.md is the map: auth and CLI rules, the authoring loop, the envelope and runtime frame, the audit trail, and which companion skill owns each topic.",
+  "version": "2.0.0",
+  "resources": [
+    {
+      "path": "resources/error-codes.md",
+      "title": "Error codes",
+      "description": "Every error code and sub-code, its CLI exit code and HTTP status, the details each carries, bundle diagnostics, the CLI version floor, and the audit status mapping."
+    }
+  ]
+}

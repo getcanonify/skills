@@ -1,0 +1,19 @@
+{
+  "name": "claim.submit",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "claim.submit",
+    "description": "Send a draft claim to the insurer.",
+    "object_type": "claim",
+    "input": { "claim_id": { "type": "string", "prefix": "clm_" } },
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "transition": { "state_machine": "Claim.status", "from": ["draft"], "to": "submitted" },
+    "handler": {
+      "steps": [{ "op": "read", "object": "claim", "where": { "id": "$input.claim_id" }, "as": "claim" }],
+      "returns": { "claim_id": "$claim.id" }
+    },
+    "presentation": { "label": "Submit", "success": "Claim submitted." }
+  }
+}

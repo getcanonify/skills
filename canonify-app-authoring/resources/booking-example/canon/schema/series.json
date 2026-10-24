@@ -1,0 +1,4 @@
+{
+  "table": "series",
+  "sql": "CREATE TABLE series (\n  id TEXT PRIMARY KEY,\n  patient_id TEXT NOT NULL REFERENCES patient(id),\n  practitioner_id TEXT NOT NULL REFERENCES practitioner(id),\n  room_id TEXT NOT NULL REFERENCES room(id),\n  weekdays TEXT NOT NULL,\n  first_start TEXT NOT NULL,\n  minutes INTEGER NOT NULL,\n  occurrences INTEGER NOT NULL,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

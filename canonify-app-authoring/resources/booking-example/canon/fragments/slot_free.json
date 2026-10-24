@@ -1,0 +1,46 @@
+{
+  "name": "slot_free",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "slot_free",
+    "description": "Refuses a time outside the practitioner's working hours, off the 15-minute grid, or that the practitioner, the room (up to its capacity) or the device already holds. Cancelled appointments hold nothing.",
+    "input": {
+      "practitioner_id": { "type": "string" },
+      "room_id": { "type": "string" },
+      "device_id": { "type": "string", "optional": true, "nullable": true },
+      "starts_at": { "type": "string", "format": "iso8601" },
+      "ends_at": { "type": "string", "format": "iso8601" },
+      "exclude_id": { "type": "string" }
+    },
+    "steps": [
+      { "op": "read_optional", "object": "working_hours", "as": "hours",
+        "where": { "practitioner_id": "$input.practitioner_id",
+                   "weekday": { "op": "date_part", "part": "weekday", "left": "$input.starts_at" },
+                   "from_time": { "lte": { "op": "date_part", "part": "time", "left": "$input.starts_at" } },
+                   "to_time": { "gte": { "op": "date_part", "part": "time", "left": "$input.ends_at" } } } },
+      { "op": "assert", "when": { "ref": "$hours.id", "present": true },
+        "else": { "code": "VALIDATION", "message": "Outside working hours.", "field": "starts_at" } },
+      { "op": "assert", "when": { "ref": "$input.starts_at", "eq": { "op": "date_sub", "left": "$input.starts_at",
+          "right": { "n": { "op": "%", "left": { "op": "date_part", "part": "minute", "left": "$input.starts_at" }, "right": 15 }, "unit": "m" } } },
+        "else": { "code": "VALIDATION", "message": "Start must be on the 15-minute grid.", "field": "starts_at" } },
+      { "op": "read_optional", "object": "appointment", "as": "busy",
+        "where": { "practitioner_id": "$input.practitioner_id", "status": { "neq": "cancelled" }, "id": { "neq": "$input.exclude_id" },
+                   "starts_at": { "lt": "$input.ends_at" }, "ends_at": { "gt": "$input.starts_at" } } },
+      { "op": "assert", "when": { "ref": "$busy.id", "absent": true },
+        "else": { "code": "VALIDATION", "message": "The practitioner is already booked then.", "field": "starts_at" } },
+      { "op": "read", "object": "room", "where": { "id": "$input.room_id" }, "as": "room" },
+      { "op": "read_aggregate", "object": "appointment", "count": true, "as": "in_room",
+        "where": { "room_id": "$input.room_id", "status": { "neq": "cancelled" }, "id": { "neq": "$input.exclude_id" },
+                   "starts_at": { "lt": "$input.ends_at" }, "ends_at": { "gt": "$input.starts_at" } } },
+      { "op": "assert", "when": { "ref": "$in_room.count", "lt": "$room.capacity" },
+        "else": { "code": "VALIDATION", "message": "The room is full then.", "field": "room_id" } },
+      { "op": "read_optional", "object": "appointment", "as": "in_use", "when": { "ref": "$input.device_id", "present": true },
+        "where": { "device_id": "$input.device_id", "status": { "neq": "cancelled" }, "id": { "neq": "$input.exclude_id" },
+                   "starts_at": { "lt": "$input.ends_at" }, "ends_at": { "gt": "$input.starts_at" } } },
+      { "op": "assert", "when": { "ref": "$in_use.id", "absent": true },
+        "else": { "code": "VALIDATION", "message": "The device is in use then.", "field": "device_id" } }
+    ],
+    "returns": { "room_capacity": "$room.capacity" }
+  }
+}

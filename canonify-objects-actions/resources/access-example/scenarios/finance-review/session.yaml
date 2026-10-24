@@ -1,0 +1,56 @@
+name: finance-review
+description: >
+  A view limited to a group: finance sees the review queue in the app's nav
+  and lands on it; a member outside finance does not see it, lands on the next
+  view, and is refused its spec by name; the owner opens it.
+
+principals:
+  owner:
+    kind: user
+    id: usr_owner
+    org_id: org_test
+  ana:
+    kind: user
+    id: usr_ana
+    org_id: org_test
+    roles: [member]
+  fay:
+    kind: user
+    id: usr_fay
+    org_id: org_test
+    roles: [member]
+    groups: [finance]
+
+steps:
+  # Finance: the restricted view is in nav and is the landing.
+  - action: apps.get
+    principal: fay
+    input: { slug: expenses }
+    expect:
+      data:
+        defaultView: Claim.review
+        nav: [{ view: Claim.review }, { view: Claim.list }]
+  - action: view_specs.describe
+    principal: fay
+    input: { name: Claim.review }
+    expect: { data: { type: table } }
+
+  # Outside finance: not in nav, the landing falls back, the spec answers as
+  # a view that does not exist.
+  - action: apps.get
+    principal: ana
+    input: { slug: expenses }
+    expect:
+      data:
+        defaultView: Claim.list
+        nav: { length: 1 }
+  - action: view_specs.describe
+    principal: ana
+    input: { name: Claim.review }
+    expect: { error: { code: NOT_FOUND } }
+
+  # The owner opens every view.
+  - action: view_specs.describe
+    principal: owner
+    input: { name: Claim.review }
+    expect: { data: { type: table } }

@@ -1,0 +1,65 @@
+{
+  "name": "calendar_day",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "calendar_day",
+    "description": "One bookable date: its weekday, a running day number n, the instant its local day starts, and whether the clinic is closed.",
+    "idPrefix": "day",
+    "properties": {
+      "date": {
+        "kind": "mapped",
+        "column": "date",
+        "type": "date",
+        "label": "Date"
+      },
+      "weekday": {
+        "kind": "mapped",
+        "column": "weekday",
+        "type": "enum",
+        "label": "Weekday",
+        "values": [
+          "mon",
+          "tue",
+          "wed",
+          "thu",
+          "fri",
+          "sat",
+          "sun"
+        ],
+        "valueLabels": {
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat",
+          "sun": "Sun"
+        }
+      },
+      "n": {
+        "kind": "mapped",
+        "column": "n",
+        "type": "number",
+        "label": "Day number"
+      },
+      "starts_at": {
+        "kind": "mapped",
+        "column": "starts_at",
+        "type": "timestamp",
+        "label": "Starts"
+      },
+      "closed": {
+        "kind": "mapped",
+        "column": "closed",
+        "type": "boolean",
+        "label": "Closed"
+      }
+    },
+    "display": {
+      "title": {
+        "property": "date"
+      }
+    }
+  }
+}

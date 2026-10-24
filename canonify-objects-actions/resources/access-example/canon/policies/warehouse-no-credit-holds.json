@@ -1,0 +1,12 @@
+{
+  "name": "warehouse-no-credit-holds",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "group", "group": "warehouse" },
+    "resource": { "object_type": "credit_hold" },
+    "operations": ["get", "list", "navigate", "aggregate"],
+    "mode": "restrict",
+    "row_filter": "id = 'none'"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "appointment.book",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "appointment.book",
+    "description": "Book one appointment at a time the practitioner, the room and the device are free.",
+    "object_type": "appointment",
+    "input": {
+      "patient_id": { "type": "string", "prefix": "pat_" },
+      "practitioner_id": { "type": "string", "prefix": "prc_" },
+      "room_id": { "type": "string", "prefix": "rm_" },
+      "device_id": { "type": "string", "prefix": "dev_", "optional": true, "nullable": true },
+      "starts_at": { "type": "string", "format": "iso8601" },
+      "minutes": { "type": "number", "min": 15, "max": 240 }
+    },
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "handler": {
+      "steps": [
+        { "op": "call", "fragment": "slot_free", "as": "free",
+          "with": { "practitioner_id": "$input.practitioner_id", "room_id": "$input.room_id", "device_id": "$input.device_id",
+                    "starts_at": "$input.starts_at", "exclude_id": "none",
+                    "ends_at": { "op": "date_add", "left": "$input.starts_at", "right": { "n": "$input.minutes", "unit": "m" } } } },
+        { "op": "insert", "object": "appointment", "as": "appointment",
+          "values": { "patient_id": "$input.patient_id", "practitioner_id": "$input.practitioner_id", "room_id": "$input.room_id",
+                      "device_id": "$input.device_id", "starts_at": "$input.starts_at", "minutes": "$input.minutes",
+                      "ends_at": { "op": "date_add", "left": "$input.starts_at", "right": { "n": "$input.minutes", "unit": "m" } } } }
+      ],
+      "returns": { "appointment_id": "$appointment.id" }
+    },
+    "presentation": { "label": "Book", "emphasis": "primary", "success": "Booked." }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "claim.submit",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "claim.submit",
+    "description": "Submit an expense claim as the caller: submitted_by is the caller's id, never an input.",
+    "object_type": "claim",
+    "input": {
+      "title": { "type": "string", "min": 1 },
+      "amount": { "type": "money", "currency": "DKK", "min": 1 },
+      "office": { "type": "string", "enum": ["cph", "aar"] }
+    },
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent"] },
+    "idempotency": "per-key",
+    "handler": {
+      "steps": [
+        {
+          "op": "insert",
+          "object": "claim",
+          "values": { "title": "$input.title", "amount": "$input.amount", "submitted_by": "$principal.id", "office": "$input.office" },
+          "as": "claim"
+        }
+      ],
+      "returns": { "claim_id": "$claim.id" }
+    },
+    "presentation": { "label": "Submit claim", "success": "Claim submitted." }
+  }
+}

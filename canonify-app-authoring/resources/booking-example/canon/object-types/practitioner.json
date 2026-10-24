@@ -1,0 +1,31 @@
+{
+  "name": "practitioner",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "practitioner",
+    "description": "A practitioner; member_id is the member who signs in as them.",
+    "idPrefix": "prc",
+    "properties": {
+      "name": {
+        "kind": "mapped",
+        "column": "name",
+        "type": "string",
+        "label": "Name"
+      },
+      "member_id": {
+        "kind": "mapped",
+        "column": "member_id",
+        "type": "string",
+        "label": "Member",
+        "nullable": true,
+        "principal": true
+      }
+    },
+    "display": {
+      "title": {
+        "property": "name"
+      }
+    }
+  }
+}

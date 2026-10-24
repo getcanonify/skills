@@ -1,0 +1,22 @@
+{
+  "name": "lab",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "slug": "lab",
+    "name": "Lab",
+    "icon": "flask-conical",
+    "defaultView": "Lab.dashboard",
+    "nav": [
+      { "view": "Lab.dashboard" },
+      { "view": "Analysis.bench" },
+      {
+        "view": "Analysis.outgoing",
+        "count": { "objectType": "analysis", "filter": { "status": "complete" } }
+      },
+      { "view": "Analysis.board" },
+      { "view": "Analysis.list" },
+      { "view": "Client.directory" }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "appointment.complete",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "appointment.complete",
+    "description": "Mark an appointment attended. Any red flag requires the action taken; the note is written after (Write note).",
+    "object_type": "appointment",
+    "input": {
+      "appointment_id": { "type": "string", "prefix": "apt_" },
+      "flags": { "type": "set<enum>", "enum": ["fever", "numbness", "weight_loss", "night_pain"], "optional": true, "nullable": true },
+      "action_taken": { "type": "string", "optional": true, "nullable": true }
+    },
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "appointment", "where": { "id": "$input.appointment_id" }, "as": "appointment" },
+        { "op": "assert", "when": { "ref": "$appointment.status", "in": ["booked", "checked_in"] },
+          "else": { "code": "INVALID_STATE", "message": "This appointment is already closed." } },
+        { "op": "update", "object": "appointment", "where": { "id": "$appointment.id" },
+          "set": { "status": "attended", "flags": "$input.flags", "action_taken": "$input.action_taken" } }
+      ],
+      "returns": { "appointment_id": "$appointment.id" }
+    },
+    "presentation": { "label": "Complete", "success": "Session recorded.",
+                      "requiredWhen": { "action_taken": [{ "field": "$input.flags", "op": "present" }] } }
+  }
+}

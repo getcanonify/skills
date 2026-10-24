@@ -1,0 +1,46 @@
+{
+  "name": "appointment.offer",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "appointment.offer",
+    "description": "Offer a freed (cancelled) slot to the next waiting entry that fits: urgent first, then the longest waiting; each one passed over is listed with why. A slot holds one open or accepted offer; an open offer past expires_at lapses here and the slot goes to the next entry (the 15-minute schedule runs this on every lapsed offer).",
+    "object_type": "appointment",
+    "input": { "appointment_id": { "type": "string", "prefix": "apt_" } },
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "subject": { "param": "appointment_id", "object_type": "appointment" },
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "appointment", "where": { "id": "$input.appointment_id" }, "as": "slot" },
+        { "op": "assert", "when": { "ref": "$slot.status", "eq": "cancelled" },
+          "else": { "code": "INVALID_STATE", "message": "Only a freed (cancelled) slot is offered." } },
+        { "op": "read_optional", "object": "waitlist_offer", "as": "lapsed",
+          "where": { "appointment_id": "$slot.id", "status": "open", "expires_at": { "lte": "$now" } } },
+        { "op": "update", "object": "waitlist_offer", "when": { "ref": "$lapsed.id", "present": true },
+          "where": { "id": "$lapsed.id" }, "set": { "status": "expired" } },
+        { "op": "update", "object": "waitlist_entry", "when": { "ref": "$lapsed.id", "present": true },
+          "where": { "id": "$lapsed.waitlist_entry_id" }, "set": { "status": "waiting" } },
+        { "op": "read_optional", "object": "waitlist_offer", "as": "held",
+          "where": { "appointment_id": "$slot.id", "status": { "in": ["open", "accepted"] } } },
+        { "op": "assert", "when": { "ref": "$held.id", "absent": true },
+          "else": { "code": "INVALID_STATE", "message": "This slot is already offered or taken." } },
+        { "op": "read_many", "object": "waitlist_entry", "as": "waiting", "where": { "status": "waiting" }, "limit": 100,
+          "order_by": [{ "property": "rank", "direction": "asc" }, { "property": "added_at", "direction": "asc" }] },
+        { "op": "pick_first", "from": "$waiting", "as": "next", "item": { "patient_id": "$next.patient_id" }, "checks": [
+          { "op": "call", "fragment": "offer_fits", "with": { "entry_id": "$next.id", "entry_practitioner_id": "$next.practitioner_id",
+            "slot_id": "$slot.id", "slot_practitioner_id": "$slot.practitioner_id" } } ] },
+        { "op": "assert", "when": { "any_of": [{ "ref": "$next.id", "present": true }, { "ref": "$lapsed.id", "present": true }] },
+          "else": { "code": "VALIDATION", "message": "Nobody on the waitlist fits this slot." } },
+        { "op": "insert", "object": "waitlist_offer", "as": "offer", "when": { "ref": "$next.id", "present": true },
+          "values": { "waitlist_entry_id": "$next.id", "appointment_id": "$slot.id", "patient_id": "$next.patient_id",
+                      "expires_at": { "op": "date_add", "left": "$now", "right": "2h" } } },
+        { "op": "update", "object": "waitlist_entry", "when": { "ref": "$next.id", "present": true },
+          "where": { "id": "$next.id" }, "set": { "status": "offered" } }
+      ],
+      "returns": { "waitlist_offer_id": "$offer.id", "patient_id": "$next.patient_id" }
+    },
+    "presentation": { "label": "Offer to waitlist", "success": "Offered to {returns.patient_id}.",
+                      "showWhen": [{ "field": "status", "op": "eq", "value": "cancelled" }] }
+  }
+}

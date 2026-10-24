@@ -1,0 +1,36 @@
+{
+  "name": "analysis.release",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "analysis.release",
+    "description": "The report went to the client and the fee was invoiced. Stamps released_at and snapshots the fee as the analysis's revenue.",
+    "object_type": "analysis",
+    "input": { "analysis_id": { "type": "string", "prefix": "ana_" } },
+    "governance": {
+      "requires_approval": false,
+      "allowed_principals": ["user", "agent", "service_account"]
+    },
+    "idempotency": "none",
+    "transition": { "state_machine": "Analysis.status", "from": ["complete"], "to": "released" },
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "analysis", "where": { "id": "$input.analysis_id" }, "as": "analysis" },
+        {
+          "op": "update",
+          "object": "analysis",
+          "where": { "id": "$analysis.id" },
+          "set": { "released_at": "$now", "revenue": "$analysis.fee" }
+        }
+      ],
+      "returns": { "analysis_id": "$analysis.id" }
+    },
+    "presentation": {
+      "label": "Release",
+      "emphasis": "primary",
+      "icon": "send",
+      "confirm": "Release the report to the client and invoice the fee?",
+      "success": "Report released."
+    }
+  }
+}

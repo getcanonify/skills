@@ -1,0 +1,29 @@
+{
+  "name": "appointment.write_note",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "appointment.write_note",
+    "description": "Write the caller's note on an attended session.",
+    "object_type": "session_note",
+    "input": {
+      "appointment_id": { "type": "string", "prefix": "apt_" },
+      "body": { "type": "string", "min": 1, "format": "multiline" }
+    },
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "subject": { "param": "appointment_id", "object_type": "appointment" },
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "appointment", "where": { "id": "$input.appointment_id" }, "as": "appointment" },
+        { "op": "assert", "when": { "ref": "$appointment.status", "eq": "attended" },
+          "else": { "code": "INVALID_STATE", "message": "Only an attended session takes a note." } },
+        { "op": "insert", "object": "session_note", "as": "note",
+          "values": { "appointment_id": "$appointment.id", "author_id": "$principal.id", "body": "$input.body" } }
+      ],
+      "returns": { "session_note_id": "$note.id" }
+    },
+    "presentation": { "label": "Write note", "success": "Note saved.",
+                      "showWhen": [{ "field": "status", "op": "eq", "value": "attended" }] }
+  }
+}

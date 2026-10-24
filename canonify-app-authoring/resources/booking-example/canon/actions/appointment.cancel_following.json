@@ -1,0 +1,30 @@
+{
+  "name": "appointment.cancel_following",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "appointment.cancel_following",
+    "description": "Cancel this series date and every later booked one (by occurrence_date, so a moved date keeps its place), with a reason. Earlier dates stay.",
+    "object_type": "appointment",
+    "input": {
+      "appointment_id": { "type": "string", "prefix": "apt_" },
+      "reason": { "type": "string", "min": 1 }
+    },
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "appointment", "where": { "id": "$input.appointment_id" }, "as": "from" },
+        { "op": "assert", "when": { "all_of": [{ "ref": "$from.status", "eq": "booked" }, { "ref": "$from.series_id", "present": true },
+                                             { "ref": "$from.occurrence_date", "present": true }] },
+          "else": { "code": "INVALID_STATE", "message": "Only a booked series date cancels the dates after it." } },
+        { "op": "update", "object": "appointment",
+          "where": { "series_id": "$from.series_id", "occurrence_date": { "gte": "$from.occurrence_date" }, "status": "booked" },
+          "set": { "status": "cancelled", "cancel_reason": "$input.reason" } }
+      ],
+      "returns": { "appointment_id": "$from.id" }
+    },
+    "presentation": { "label": "Cancel this and following", "destructive": true, "success": "Cancelled this and the following dates.",
+                      "showWhen": [{ "field": "series_id", "op": "present" }, { "field": "status", "op": "eq", "value": "booked" }] }
+  }
+}

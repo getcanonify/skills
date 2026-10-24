@@ -1,0 +1,496 @@
+name: booking
+description: >
+  The booking recipe end to end, on a pinned org clock (Fri 23 Oct 2026,
+  09:30 Brussels): a slot is free only inside working hours, on the 15-minute
+  grid, and when the practitioner, the room (to its capacity) and the device
+  are; Today buckets by the org clock; a weekly
+  series plans exactly N dates (15:00 across a DST change) and books an input
+  array of them: a closed one skipped, a busy one refusing until moved; skip
+  and move keep the series; a red flag requires the action taken; "has a
+  note" is a rollup a practitioner can filter; scans are walled from the
+  front desk; a practitioner sees the patients they lead and
+  the ones they cover (a cancelled appointment covers nothing), and the
+  claims and waitlist of the ones they lead; the front desk decides claims.
+
+principals:
+  owner: { kind: user, id: usr_owner, org_id: org_test }
+  elise: { kind: user, id: usr_elise, org_id: org_test, roles: [member], groups: [practitioners] }
+  ward: { kind: user, id: usr_ward, org_id: org_test, roles: [member], groups: [practitioners] }
+  fran: { kind: user, id: usr_fran, org_id: org_test, roles: [member], groups: [front_desk] }
+
+steps:
+  # Keep the seed's dates and pin the clock to its today (owner only).
+  - action: org.update
+    principal: owner
+    input: { timezone: Europe/Brussels, demo_now: '2026-10-23T09:30' }
+    expect: { data: { demo_now: '2026-10-23T07:30:00.000Z' } }
+
+  - action: objects.import
+    principal: owner
+    input:
+      object_type: practitioner
+      rows:
+        - { id: prc_elise, name: Elise, member_id: usr_elise }
+        - { id: prc_ward, name: Ward, member_id: usr_ward }
+  - action: objects.import
+    principal: owner
+    input:
+      object_type: working_hours
+      rows:
+        - { id: wh_elise, practitioner_id: prc_elise, weekday: fri, from_time: '08:00', to_time: '16:00' }
+        - { id: wh_elise_mon, practitioner_id: prc_elise, weekday: mon, from_time: '08:00', to_time: '17:00' }
+        - { id: wh_ward, practitioner_id: prc_ward, weekday: fri, from_time: '09:30', to_time: '18:00' }
+  - action: objects.import
+    principal: owner
+    input:
+      object_type: room
+      rows:
+        - { id: rm_t1, name: Treatment 1, capacity: 1 }
+        - { id: rm_gym, name: Gym, capacity: 3 }
+  - action: objects.import
+    principal: owner
+    input: { object_type: device, rows: [{ id: dev_shock, name: Shockwave }] }
+  - action: objects.import
+    principal: owner
+    input:
+      object_type: patient
+      rows:
+        - { id: pat_ana, name: Ana, lead_practitioner_id: prc_elise }
+        - { id: pat_ben, name: Ben, lead_practitioner_id: prc_ward }
+        - { id: pat_cleo, name: Cleo, lead_practitioner_id: prc_elise }
+        - { id: pat_dina, name: Dina, lead_practitioner_id: prc_elise }
+  - action: objects.import
+    principal: owner
+    input: { object_type: scan, rows: [{ id: scn_ana, patient_id: pat_ana, taken_on: '2026-10-12' }] }
+  # A calendar row per bookable date, from local midnight. Fri 30 Oct is closed.
+  - action: objects.import
+    principal: owner
+    input:
+      object_type: calendar_day
+      rows:
+        - { date: '2026-10-19', weekday: mon, n: 0, starts_at: '2026-10-19T00:00' }
+        - { date: '2026-10-20', weekday: tue, n: 1, starts_at: '2026-10-20T00:00' }
+        - { date: '2026-10-21', weekday: wed, n: 2, starts_at: '2026-10-21T00:00' }
+        - { date: '2026-10-22', weekday: thu, n: 3, starts_at: '2026-10-22T00:00' }
+        - { date: '2026-10-23', weekday: fri, n: 4, starts_at: '2026-10-23T00:00' }
+        - { date: '2026-10-24', weekday: sat, n: 5, starts_at: '2026-10-24T00:00' }
+        - { date: '2026-10-25', weekday: sun, n: 6, starts_at: '2026-10-25T00:00' }
+        - { date: '2026-10-26', weekday: mon, n: 7, starts_at: '2026-10-26T00:00' }
+        - { date: '2026-10-27', weekday: tue, n: 8, starts_at: '2026-10-27T00:00' }
+        - { date: '2026-10-28', weekday: wed, n: 9, starts_at: '2026-10-28T00:00' }
+        - { date: '2026-10-29', weekday: thu, n: 10, starts_at: '2026-10-29T00:00' }
+        - { date: '2026-10-30', weekday: fri, n: 11, starts_at: '2026-10-30T00:00', closed: true }
+        - { date: '2026-10-31', weekday: sat, n: 12, starts_at: '2026-10-31T00:00' }
+        - { date: '2026-11-01', weekday: sun, n: 13, starts_at: '2026-11-01T00:00' }
+        - { date: '2026-11-02', weekday: mon, n: 14, starts_at: '2026-11-02T00:00' }
+        - { date: '2026-11-03', weekday: tue, n: 15, starts_at: '2026-11-03T00:00' }
+        - { date: '2026-11-04', weekday: wed, n: 16, starts_at: '2026-11-04T00:00' }
+        - { date: '2026-11-05', weekday: thu, n: 17, starts_at: '2026-11-05T00:00' }
+        - { date: '2026-11-06', weekday: fri, n: 18, starts_at: '2026-11-06T00:00' }
+        - { date: '2026-11-07', weekday: sat, n: 19, starts_at: '2026-11-07T00:00' }
+        - { date: '2026-11-08', weekday: sun, n: 20, starts_at: '2026-11-08T00:00' }
+
+  # Today: 08:45 Elise in Treatment 1, 10:00 Ward in Treatment 1.
+  - action: appointment.book
+    principal: owner
+    input: { patient_id: pat_ana, practitioner_id: prc_elise, room_id: rm_t1, starts_at: '2026-10-23T08:45', minutes: 30 }
+    bind: early
+  - action: appointment.book
+    principal: owner
+    input: { patient_id: pat_ben, practitioner_id: prc_ward, room_id: rm_t1, starts_at: '2026-10-23T10:00', minutes: 30 }
+    bind: ten
+  # Elise is free at 10:15, but Treatment 1 (capacity 1) is not.
+  - action: appointment.book
+    principal: owner
+    input: { patient_id: pat_ben, practitioner_id: prc_elise, room_id: rm_t1, starts_at: '2026-10-23T10:15', minutes: 30 }
+    expect: { error: { code: VALIDATION, message: The room is full then. } }
+  # The gym holds three, but Ward is busy until 10:30.
+  - action: appointment.book
+    principal: owner
+    input: { patient_id: pat_ana, practitioner_id: prc_ward, room_id: rm_gym, starts_at: '2026-10-23T10:15', minutes: 30 }
+    expect: { error: { code: VALIDATION, message: The practitioner is already booked then. } }
+  # 11:00 Ward covers Ana with the device; Elise cannot use it then too.
+  - action: appointment.book
+    principal: owner
+    input: { patient_id: pat_ana, practitioner_id: prc_ward, room_id: rm_gym, device_id: dev_shock, starts_at: '2026-10-23T11:00', minutes: 15 }
+    bind: eleven
+  - action: appointment.book
+    principal: owner
+    input: { patient_id: pat_cleo, practitioner_id: prc_elise, room_id: rm_gym, device_id: dev_shock, starts_at: '2026-10-23T11:00', minutes: 15 }
+    expect: { error: { code: VALIDATION, message: The device is in use then. } }
+  # Without the device it fits: the gym holds three at once.
+  - action: appointment.book
+    principal: owner
+    input: { patient_id: pat_cleo, practitioner_id: prc_elise, room_id: rm_gym, starts_at: '2026-10-23T11:00', minutes: 15 }
+  # Elise works until 16:00 (a `time`, read in the org zone); starts sit on quarter hours.
+  - action: appointment.book
+    principal: owner
+    input: { patient_id: pat_ana, practitioner_id: prc_elise, room_id: rm_t1, starts_at: '2026-10-23T15:45', minutes: 30 }
+    expect: { error: { code: VALIDATION, message: Outside working hours. } }
+  - action: appointment.book
+    principal: owner
+    input: { patient_id: pat_ana, practitioner_id: prc_elise, room_id: rm_t1, starts_at: '2026-10-23T13:10', minutes: 15 }
+    expect: { error: { code: VALIDATION, message: Start must be on the 15-minute grid. } }
+
+  # Today on the pinned clock: 08:45 passed unchecked is Overdue, not Next hour.
+  - read: objects.get
+    principal: owner
+    input: { type: appointment, id: $early.appointment_id }
+    expect: { data: { day_part: overdue } }
+  - read: objects.get
+    principal: owner
+    input: { type: appointment, id: $ten.appointment_id }
+    expect: { data: { day_part: next_hour } }
+  - read: objects.get
+    principal: owner
+    input: { type: appointment, id: $eleven.appointment_id }
+    expect: { data: { day_part: later } }
+  - read: objects.aggregate
+    principal: owner
+    input: { type: appointment, op: count, filter: { starts_at: ':today' } }
+    expect: { value: 4 }
+
+  # A series is planned (one series_date per date), then booked from an input
+  # array of those dates. Ward's Fridays at 10:00: today's 10:00 is taken, so
+  # Book dates refuses with each date's outcome; moved to 10:30 it books, and
+  # the closed Fri 30 is skipped.
+  - action: series.plan_weekly
+    principal: owner
+    input:
+      patient_id: pat_ben
+      practitioner_id: prc_ward
+      room_id: rm_gym
+      first_start: '2026-10-23T10:00'
+      minutes: 30
+      weekdays: [fri]
+      occurrences: 2
+    bind: ward_plan
+  - read: objects.list
+    principal: owner
+    input: { type: series_date, filter: { series_id: $ward_plan.series_id } }
+    bind: ward_dates
+    expect:
+      data:
+        - { starts_at: '2026-10-23T08:00:00.000Z' }
+        - { starts_at: '2026-10-30T09:00:00.000Z' }
+  - action: series.book
+    principal: owner
+    input:
+      series_id: $ward_plan.series_id
+      dates: [{ starts_at: $ward_dates.0.starts_at }, { starts_at: $ward_dates.1.starts_at }]
+    expect:
+      error:
+        code: VALIDATION
+        message: The practitioner is already booked then.
+        details: { outcomes: [{ index: 0, input: dates, status: refused }] }
+  - action: series.book
+    principal: owner
+    input:
+      series_id: $ward_plan.series_id
+      dates: [{ starts_at: '2026-10-23T08:30:00.000Z' }, { starts_at: $ward_dates.1.starts_at }]
+    expect:
+      data:
+        outcomes:
+          - { status: ok, item: { starts_at: '2026-10-23T08:30:00.000Z' } }
+          - { status: skipped, reason: Clinic closed }
+
+  # Mon + Fri at 15:00 local, 4 occurrences from today: Fri 23, Mon 26 (CET
+  # now, so 14:00Z), Fri 30 (closed: skipped, still counted), Mon 2 Nov.
+  - action: series.plan_weekly
+    principal: owner
+    input:
+      patient_id: pat_ana
+      practitioner_id: prc_elise
+      room_id: rm_t1
+      first_start: '2026-10-23T15:00'
+      minutes: 30
+      weekdays: [mon, fri]
+      occurrences: 4
+    bind: plan
+  - read: objects.list
+    principal: owner
+    input: { type: series_date, filter: { series_id: $plan.series_id } }
+    bind: dates
+    expect: { data: { length: 4 } }
+  - action: series.book
+    principal: owner
+    input:
+      series_id: $plan.series_id
+      dates:
+        - { starts_at: $dates.0.starts_at }
+        - { starts_at: $dates.1.starts_at }
+        - { starts_at: $dates.2.starts_at }
+        - { starts_at: $dates.3.starts_at }
+    bind: weekly
+    expect:
+      data:
+        outcomes:
+          - { status: ok, item: { starts_at: '2026-10-23T13:00:00.000Z' } }
+          - { status: ok, item: { starts_at: '2026-10-26T14:00:00.000Z' } }
+          - { status: skipped, item: { starts_at: '2026-10-30T14:00:00.000Z' }, reason: Clinic closed }
+          - { status: ok, item: { starts_at: '2026-11-02T14:00:00.000Z' } }
+  - read: objects.list
+    principal: owner
+    input: { type: appointment, filter: { series_id: $weekly.series_id } }
+    bind: occ
+    expect:
+      data:
+        - { occurrence_date: '2026-10-23', starts_at: '2026-10-23T13:00:00.000Z', status: booked }
+        - { occurrence_date: '2026-10-26', starts_at: '2026-10-26T14:00:00.000Z', status: booked }
+        - { occurrence_date: '2026-11-02', starts_at: '2026-11-02T14:00:00.000Z', status: booked }
+  - read: objects.get
+    principal: owner
+    input: { type: series, id: $weekly.series_id }
+    expect: { data: { weekdays: [mon, fri] } }
+
+  # Exceptions: skip keeps the date on the series; move keeps occurrence_date.
+  - action: appointment.skip
+    principal: owner
+    input: { appointment_id: $occ.2.id, reason: Patient away }
+  - action: appointment.move
+    principal: owner
+    input: { appointment_id: $occ.1.id, starts_at: '2026-10-26T15:00:00.000Z' }
+  - read: objects.list
+    principal: owner
+    input: { type: appointment, filter: { series_id: $weekly.series_id } }
+    expect:
+      data:
+        - { status: booked }
+        - { occurrence_date: '2026-10-26', starts_at: '2026-10-26T15:00:00.000Z', moved: true }
+        - { status: cancelled, cancel_reason: Patient away }
+
+  # "If any red flag, then the action taken": requiredWhen; no flag (`[]`) needs none.
+  - action: appointment.complete
+    principal: elise
+    input: { appointment_id: $early.appointment_id, flags: [fever] }
+    expect: { error: { code: VALIDATION, details: { code: required_when_blank } } }
+  - action: appointment.complete
+    principal: elise
+    input: { appointment_id: $early.appointment_id, flags: [fever], action_taken: Referred to GP }
+  - action: appointment.complete
+    principal: ward
+    input: { appointment_id: $ten.appointment_id, flags: [] }
+
+  # Notes to write: "has a note" is a rollup over the notes, so it counts the
+  # notes each reader may read. A derived EXISTS over session_note would be
+  # withheld from a practitioner (they read notes under a row filter) and the
+  # list's has_note filter refused.
+  - action: appointment.write_note
+    principal: elise
+    input: { appointment_id: $early.appointment_id, body: Seen }
+  - read: objects.list
+    principal: elise
+    input: { type: appointment, filter: { status: attended, has_note: false } }
+    expect: { data: [{ patient_id: pat_ben }] }
+
+  # Scans are their own type (the image a `file` property), walled from the
+  # front desk; a practitioner reads them.
+  - read: objects.list
+    principal: fran
+    input: { type: scan }
+    expect: { data: { length: 0 } }
+  - read: objects.get
+    principal: fran
+    input: { type: scan, id: scn_ana }
+    expect: { data: null }
+  - read: objects.aggregate
+    principal: fran
+    input: { type: scan, op: count }
+    expect: { value: 0 }
+  - read: objects.navigate
+    principal: fran
+    input: { type: patient, id: pat_ana, link: scans }
+    expect: { data: { length: 0 } }
+  - read: objects.list
+    principal: elise
+    input: { type: scan, filter: { patient_id: pat_ana } }
+    expect: { data: { length: 1 } }
+
+  # Ward's cancelled 12:00 with Cleo covers nothing.
+  - action: appointment.book
+    principal: owner
+    input: { patient_id: pat_cleo, practitioner_id: prc_ward, room_id: rm_t1, starts_at: '2026-10-23T12:00', minutes: 30 }
+    bind: noon
+  - action: appointment.skip
+    principal: owner
+    input: { appointment_id: $noon.appointment_id, reason: Patient called off }
+
+  # Ward leads Ben and covered Ana today; Elise leads Ana and Cleo.
+  - read: objects.list
+    principal: ward
+    input: { type: patient }
+    expect: { data: { length: 2 } }
+  - read: objects.list
+    principal: ward
+    input: { type: patient, filter: { id: pat_cleo } }
+    expect: { data: { length: 0 } }
+  - read: objects.list
+    principal: elise
+    input: { type: patient, filter: { id: pat_ben } }
+    expect: { data: { length: 0 } }
+
+  # "This and following" cancels a series date and every later booked one by
+  # occurrence_date (the moved Mon 26 included); Fri 23 stays. Not a series: refused.
+  - action: appointment.cancel_following
+    principal: owner
+    input: { appointment_id: $noon.appointment_id, reason: Course ended }
+    expect: { error: { code: INVALID_STATE, message: Only a booked series date cancels the dates after it. } }
+  - action: appointment.cancel_following
+    principal: owner
+    input: { appointment_id: $occ.1.id, reason: Course ended }
+  - read: objects.list
+    principal: owner
+    input: { type: appointment, filter: { series_id: $weekly.series_id } }
+    expect:
+      data:
+        - { occurrence_date: '2026-10-23', status: booked }
+        - { occurrence_date: '2026-10-26', status: cancelled, cancel_reason: Course ended }
+        - { occurrence_date: '2026-11-02', status: cancelled, cancel_reason: Patient away }
+
+  # Waitlist, added from the patient record (subject: the patient). Ben is
+  # urgent but waits for Elise; Ana takes any practitioner.
+  - action: waitlist.add
+    principal: owner
+    input: { patient_id: pat_ben, practitioner_id: prc_elise, urgent: true }
+  - action: waitlist.add
+    principal: owner
+    input: { patient_id: pat_ana }
+    bind: ana_waits
+  # Ward's freed 12:00 goes to Ana; Ben is passed over with why.
+  - action: appointment.offer
+    principal: owner
+    input: { appointment_id: $noon.appointment_id }
+    expect:
+      data:
+        patient_id: pat_ana
+        outcomes:
+          - { status: skipped, item: { patient_id: pat_ben }, reason: Waits for another practitioner. }
+          - { status: ok, item: { patient_id: pat_ana } }
+  # A slot holds one open offer: a second Offer is refused.
+  - action: appointment.offer
+    principal: owner
+    input: { appointment_id: $noon.appointment_id }
+    expect: { error: { code: INVALID_STATE, message: This slot is already offered or taken. } }
+
+  # Expiry advances: past expires_at (11:30) the 15-minute schedule lapses
+  # Ana's offer and offers the slot to the next entry that fits, Dina.
+  - action: schedules.declare
+    principal: owner
+    input:
+      name: waitlist.expire_offers
+      description: Every 15 minutes, lapse each open offer past expires_at and offer its slot to the next entry.
+      trigger: { schedule: 15m }
+      target:
+        object_type: appointment
+        where:
+          status: cancelled
+          $exists:
+            { object_type: waitlist_offer, via_link: slot, direction: child,
+              where: { status: open, expires_at: { lte: $now } } }
+        action: appointment.offer
+        input_template: { appointment_id: $row.id }
+      governance: { requires_approval: false, allowed_principals: [user, agent, service_account] }
+      idempotency: { per_row: true }
+  - action: org.update
+    principal: owner
+    input: { demo_now: '2026-10-23T11:45' }
+  - action: waitlist.add
+    principal: owner
+    input: { patient_id: pat_dina }
+  - orchestration: schedules.run
+    principal: owner
+    input: { name: waitlist.expire_offers }
+    expect: { data: { matched_rows: 1, invocations_succeeded: 1 } }
+  - read: objects.list
+    principal: owner
+    input: { type: waitlist_offer, filter: { appointment_id: $noon.appointment_id } }
+    bind: offers
+    expect:
+      data:
+        - { patient_id: pat_ana, status: expired }
+        - { patient_id: pat_dina, status: open }
+  - read: objects.get
+    principal: owner
+    input: { type: waitlist_entry, id: $ana_waits.waitlist_entry_id }
+    expect: { data: { status: waiting } }
+  # Dina accepts: the slot is booked for her and taken, so no further offer.
+  - action: waitlist_offer.accept
+    principal: owner
+    input: { waitlist_offer_id: $offers.1.id }
+  - action: appointment.offer
+    principal: owner
+    input: { appointment_id: $noon.appointment_id }
+    expect: { error: { code: INVALID_STATE, message: This slot is already offered or taken. } }
+
+  # Build claims (the claims board's create): every attended session onto its
+  # patient's draft — Ana's two, Ben's one; a second run finds nothing new.
+  - action: appointment.complete
+    principal: owner
+    input: { appointment_id: $eleven.appointment_id }
+  - action: claim.build
+    principal: owner
+    input: {}
+    expect: { data: { sessions: 3 } }
+  - action: claim.build
+    principal: owner
+    input: {}
+    expect: { data: { sessions: 0 } }
+  - read: objects.list
+    principal: owner
+    input: { type: claim, filter: { patient_id: pat_ana } }
+    bind: ana_claim
+    expect: { data: [{ status: draft, claimed: 9000 }] }
+  - read: objects.list
+    principal: owner
+    input: { type: claim_line, filter: { appointment_id: $eleven.appointment_id } }
+    bind: cut
+  # Claims and the waitlist follow the patient's lead: Elise reads Ana's claim
+  # with both lines (Ward's session too), never Ben's; Ward reads only Ben's.
+  - read: objects.list
+    principal: elise
+    input: { type: claim, filter: { patient_id: pat_ben } }
+    expect: { data: { length: 0 } }
+  - read: objects.list
+    principal: elise
+    input: { type: claim_line, filter: { claim_id: $ana_claim.0.id } }
+    expect: { data: { length: 2 } }
+  - read: objects.list
+    principal: ward
+    input: { type: claim }
+    expect: { data: { length: 1 } }
+  - read: objects.list
+    principal: ward
+    input: { type: claim_line }
+    expect: { data: { length: 1 } }
+  - read: objects.list
+    principal: elise
+    input: { type: waitlist_entry, filter: { patient_id: pat_ben } }
+    expect: { data: { length: 0 } }
+  - read: objects.list
+    principal: ward
+    input: { type: waitlist_offer }
+    expect: { data: { length: 0 } }
+  - read: objects.list
+    principal: fran
+    input: { type: claim }
+    expect: { data: { length: 2 } }
+  - action: claim.submit
+    principal: owner
+    input: { claim_id: $ana_claim.0.id }
+  # The decision is `operation: manage`, granted to the front desk only.
+  - action: claim.decide_partial
+    principal: elise
+    input: { claim_id: $ana_claim.0.id, reason: Device not covered, lines: [{ claim_line_id: $cut.0.id, approved: 2000 }] }
+    expect: { error: { code: FORBIDDEN } }
+  # A partial decision sets what each line approved (the form opens at its claim); a line left out is approved as claimed.
+  - action: claim.decide_partial
+    principal: fran
+    input: { claim_id: $ana_claim.0.id, reason: Device not covered, lines: [{ claim_line_id: $cut.0.id, approved: 5000 }] }
+    expect: { error: { code: VALIDATION, message: A line approves more than it claimed. } }
+  - action: claim.decide_partial
+    principal: fran
+    input: { claim_id: $ana_claim.0.id, reason: Device not covered, lines: [{ claim_line_id: $cut.0.id, approved: 2000 }] }
+  - read: objects.get
+    principal: owner
+    input: { type: claim, id: $ana_claim.0.id }
+    expect: { data: { status: partial, claimed: 9000, approved: 6500, reason: Device not covered } }

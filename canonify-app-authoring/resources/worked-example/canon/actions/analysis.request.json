@@ -1,0 +1,60 @@
+{
+  "name": "analysis.request",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "analysis.request",
+    "description": "Request an analysis of a client's sample. The analysis's client is read from the sample, and a sample that belongs to another client is refused before the handler runs (its sample_id is outside the input's scope), so the analysis and the sample can never disagree.",
+    "object_type": "analysis",
+    "input": {
+      "client_id": { "type": "string", "prefix": "cli_" },
+      "sample_id": { "type": "string", "prefix": "smp_" },
+      "title": { "type": "string", "min": 1 },
+      "due_at": { "type": "string", "format": "iso8601" },
+      "priority": { "type": "string", "enum": ["standard", "express"] },
+      "fee": { "type": "money", "currency": "DKK", "min": 0 }
+    },
+    "governance": {
+      "requires_approval": false,
+      "allowed_principals": ["user", "agent", "service_account"]
+    },
+    "idempotency": "per-key",
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "sample", "where": { "id": "$input.sample_id" }, "as": "sample" },
+        {
+          "op": "insert",
+          "object": "analysis",
+          "values": {
+            "sample_id": "$sample.id",
+            "client_id": "$sample.client_id",
+            "title": "$input.title",
+            "due_at": "$input.due_at",
+            "priority": "$input.priority",
+            "fee": "$input.fee"
+          },
+          "as": "analysis"
+        }
+      ],
+      "returns": { "analysis_id": "$analysis.id" }
+    },
+    "presentation": {
+      "label": "Request analysis",
+      "description": "Queue an analysis of a client's sample.",
+      "icon": "flask-conical",
+      "formFields": ["client_id", "sample_id", "title", "due_at", "priority", "fee"],
+      "inputLabels": {
+        "client_id": "Client",
+        "sample_id": "Sample",
+        "title": "What to test for",
+        "due_at": "Due",
+        "priority": "Priority",
+        "fee": "Fee"
+      },
+      "inputValueLabels": { "priority": { "standard": "Standard", "express": "Express" } },
+      "inputDefaults": { "priority": "standard" },
+      "inputFilters": { "sample_id": { "client_id": "$input.client_id" } },
+      "success": "Analysis queued."
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "front-desk-decides-claims",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "group", "group": "front_desk" },
+    "resource": { "action": "claim.decide_partial" },
+    "operations": ["manage"]
+  }
+}

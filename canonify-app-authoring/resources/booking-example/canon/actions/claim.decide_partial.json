@@ -1,0 +1,43 @@
+{
+  "name": "claim.decide_partial",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "claim.decide_partial",
+    "description": "Record a partial decision: the form opens with every line at its claimed amount; set what the insurer approved. A line left out is approved as claimed.",
+    "object_type": "claim",
+    "input": {
+      "claim_id": { "type": "string", "prefix": "clm_" },
+      "reason": { "type": "string", "min": 1 },
+      "lines": { "type": "array", "min": 1, "items": {
+        "claim_line_id": { "type": "string", "prefix": "cln_" },
+        "approved": { "type": "money", "currency": "EUR", "min": 0 } } }
+    },
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"], "operation": "manage" },
+    "idempotency": "none",
+    "transition": { "state_machine": "Claim.status", "from": ["submitted"], "to": "partial" },
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "claim", "where": { "id": "$input.claim_id" }, "as": "claim" },
+        { "op": "read_many", "object": "claim_line", "as": "all", "where": { "claim_id": "$claim.id" } },
+        { "op": "for_each", "in": "$all", "as": "line", "steps": [
+          { "op": "update", "object": "claim_line", "where": { "id": "$line.id" }, "set": { "approved": "$line.claimed" } } ] },
+        { "op": "for_each", "in": "$input.lines", "as": "row", "steps": [
+          { "op": "read", "object": "claim_line", "as": "line", "where": { "id": "$row.claim_line_id", "claim_id": "$claim.id" } },
+          { "op": "assert", "when": { "ref": "$row.approved", "lte": "$line.claimed" },
+            "else": { "code": "VALIDATION", "message": "A line approves more than it claimed.", "field": "lines" } },
+          { "op": "update", "object": "claim_line", "where": { "id": "$line.id" }, "set": { "approved": "$row.approved" } } ] },
+        { "op": "update", "object": "claim", "where": { "id": "$claim.id" }, "set": { "reason": "$input.reason" } }
+      ],
+      "returns": { "claim_id": "$claim.id" }
+    },
+    "presentation": {
+      "label": "Partial decision", "success": "Partial decision recorded.",
+      "inputLabels": { "lines": "Lines", "lines.claim_line_id": "Session", "lines.approved": "Approved" },
+      "inputFilters": { "lines.claim_line_id": { "claim_id": "$subject.id" } },
+      "inputDefaults": {
+        "lines": { "from": "$subject.lines", "map": { "claim_line_id": "id", "approved": "claimed" } },
+        "lines.approved": "$row.claim_line_id.claimed" }
+    }
+  }
+}

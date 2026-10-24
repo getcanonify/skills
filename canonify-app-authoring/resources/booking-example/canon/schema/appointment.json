@@ -1,0 +1,4 @@
+{
+  "table": "appointment",
+  "sql": "CREATE TABLE appointment (\n  id TEXT PRIMARY KEY,\n  patient_id TEXT NOT NULL REFERENCES patient(id),\n  practitioner_id TEXT NOT NULL REFERENCES practitioner(id),\n  room_id TEXT NOT NULL REFERENCES room(id),\n  device_id TEXT REFERENCES device(id),\n  starts_at TEXT NOT NULL,\n  ends_at TEXT NOT NULL,\n  minutes INTEGER NOT NULL,\n  fee INTEGER NOT NULL DEFAULT 4500,\n  status TEXT NOT NULL DEFAULT 'booked',\n  series_id TEXT REFERENCES series(id),\n  occurrence_date TEXT,\n  moved INTEGER NOT NULL DEFAULT 0,\n  cancel_reason TEXT,\n  flags TEXT,\n  action_taken TEXT,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

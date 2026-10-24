@@ -1,0 +1,4 @@
+{
+  "table": "device",
+  "sql": "CREATE TABLE device (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

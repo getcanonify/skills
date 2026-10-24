@@ -1,0 +1,27 @@
+{
+  "name": "canonify-app-authoring",
+  "description": "A short, top-to-bottom tutorial that takes an empty Canon org to a working app: schema.propose_migration → catalog.refine_object_type → actions.declare → state_machines.register → view_specs.declare, one example per chapter, each linking to its one reference page in canonify-objects-actions or canonify-viewspecs. Covers the approval path for agent-authored declarations, seeding with objects.import, verifying the rendered app, a complete worked-example bundle with its scenario, app patterns (human codes, create-then-transition, bookings and weekly series), the App record and the catalog bundle lifecycle, and bilingual apps.",
+  "version": "2.0.0",
+  "resources": [
+    {
+      "path": "resources/worked-example.md",
+      "title": "Worked example — a complete, small app bundle you can apply",
+      "description": "One whole app as an on-disk bundle shipped inside this skill (resources/worked-example/): three tables with integer-minor-unit money, refined ObjectTypes with belongs-to links, enum colours and derived properties, an Analysis.status state machine, five custom actions, seven views, an app, and a scenario that seeds with objects.import and proves the business loop. Run it with `canon catalog test canon scenarios`; copy its shape."
+    },
+    {
+      "path": "resources/patterns.md",
+      "title": "App patterns — human codes, create-then-transition, bookings",
+      "description": "Minting a human-readable code like J-1042 (an integer sequence via read_aggregate max + 1 and a derived string property), and a create action whose new record starts past the state machine's initial state (insert + transition step under a transition marker, offered on the parent record or as a board column's + New), and bookings with a runnable booking-example/ bundle: one slot_free fragment over practitioner, room capacity and device, a weekly series of N dates over calendar rows with skip and move, Today buckets on the org clock, a guarded call for a conditional rule, lead and cover grants (patients, claims, waitlist), cancel this and following, a waitlist offer that holds its slot and advances on expiry, Build claims on the claims board and a partial decision over the cut lines."
+    },
+    {
+      "path": "resources/catalog-bundle.md",
+      "title": "The App record and the catalog bundle",
+      "description": "apps.declare (nav, defaultView, count badges, the derived Browse data list), then the bundle lifecycle: canon catalog export / validate / audit / test / scratch / apply — the total validator and its diagnostic codes, pre-write refusal, pruning of the managed partition, the two-step new-column change, and the --baseline / --force guard (STALE_CANON, BASELINE_REQUIRED)."
+    },
+    {
+      "path": "resources/bilingual-apps.md",
+      "title": "Go bilingual — locales, @t: message keys, and the i18n bundle",
+      "description": "Declare supported_locales/default_locale on the App, write display text as @t:<key> message keys (identifiers and enum values stay English), ship one i18n/<locale>.json per locale in the bundle, and let catalog.apply fail on missing_message_key / missing_locale_bundle / default_locale_not_supported. Includes email templates, per-surface locale chains, and why multi-locale is a bundle-only move (multi_locale_requires_bundle)."
+    }
+  ]
+}

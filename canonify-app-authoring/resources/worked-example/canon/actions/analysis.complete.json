@@ -1,0 +1,29 @@
+{
+  "name": "analysis.complete",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "analysis.complete",
+    "description": "The run is done and the results are in; the report is ready to release.",
+    "object_type": "analysis",
+    "input": { "analysis_id": { "type": "string", "prefix": "ana_" } },
+    "governance": {
+      "requires_approval": false,
+      "allowed_principals": ["user", "agent", "service_account"]
+    },
+    "idempotency": "none",
+    "transition": { "state_machine": "Analysis.status", "from": ["running"], "to": "complete" },
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "analysis", "where": { "id": "$input.analysis_id" }, "as": "analysis" }
+      ],
+      "returns": { "analysis_id": "$analysis.id" }
+    },
+    "presentation": {
+      "label": "Mark complete",
+      "emphasis": "primary",
+      "icon": "check",
+      "success": "Ready to release."
+    }
+  }
+}

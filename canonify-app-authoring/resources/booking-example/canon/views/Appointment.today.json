@@ -1,0 +1,20 @@
+{
+  "name": "Appointment.today",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Today",
+    "icon": "calendar",
+    "object_type": "appointment",
+    "spec": {
+      "type": "table",
+      "source": { "objectType": "appointment", "filter": { "starts_at": ":today" }, "sort": "starts_at" },
+      "columns": ["starts_at", "patient_id", "practitioner_id", "room_id", "status"],
+      "rowGroups": { "by": "day_part", "groups": [
+        { "value": "overdue", "label": "Overdue" }, { "value": "now", "label": "Now" },
+        { "value": "next_hour", "label": "Next hour" }, { "value": "later", "label": "Later" },
+        { "value": "done", "label": "Done" } ] },
+      "rowActions": [{ "action": "appointment.complete", "default": true }, "appointment.move", "appointment.skip"]
+    }
+  }
+}
