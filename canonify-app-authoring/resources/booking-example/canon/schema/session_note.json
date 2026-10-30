@@ -1,0 +1,4 @@
+{
+  "table": "session_note",
+  "sql": "CREATE TABLE session_note (\n  id TEXT PRIMARY KEY,\n  appointment_id TEXT NOT NULL REFERENCES appointment(id),\n  author_id TEXT NOT NULL,\n  body TEXT NOT NULL,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

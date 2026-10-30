@@ -1,0 +1,4 @@
+{
+  "table": "sample",
+  "sql": "CREATE TABLE sample (\n  id          TEXT PRIMARY KEY,\n  client_id   TEXT NOT NULL,\n  reference   TEXT NOT NULL,\n  site        TEXT NOT NULL,\n  matrix      TEXT NOT NULL DEFAULT 'water',\n  created_at  TEXT NOT NULL,\n  updated_at  TEXT NOT NULL\n)"
+}

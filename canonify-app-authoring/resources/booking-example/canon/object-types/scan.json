@@ -1,0 +1,45 @@
+{
+  "name": "scan",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "scan",
+    "description": "A patient's scan, its image in a typed file property (not a plain attachment, which follows the patient), so a wall keeps it from the front desk.",
+    "idPrefix": "scn",
+    "properties": {
+      "patient_id": {
+        "kind": "mapped",
+        "column": "patient_id",
+        "type": "string",
+        "label": "Patient"
+      },
+      "taken_on": {
+        "kind": "mapped",
+        "column": "taken_on",
+        "type": "date",
+        "label": "Taken"
+      },
+      "image": {
+        "kind": "mapped",
+        "column": "image",
+        "type": "file",
+        "label": "Image",
+        "accept": ["image/*"],
+        "nullable": true
+      }
+    },
+    "links": {
+      "patient": {
+        "target": "patient",
+        "cardinality": "one",
+        "via": "patient_id",
+        "fk_on": "source"
+      }
+    },
+    "display": {
+      "title": {
+        "template": "Scan {taken_on}"
+      }
+    }
+  }
+}

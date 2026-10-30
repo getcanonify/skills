@@ -1,0 +1,10 @@
+{
+  "name": "finance",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "finance",
+    "label": "Finance",
+    "description": "Reads every claim in its offices and approves submitted ones."
+  }
+}

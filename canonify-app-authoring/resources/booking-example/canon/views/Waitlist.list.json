@@ -1,0 +1,18 @@
+{
+  "name": "Waitlist.list",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Waitlist",
+    "icon": "list-ordered",
+    "object_type": "waitlist_entry",
+    "spec": {
+      "type": "table",
+      "source": { "objectType": "waitlist_entry", "sort": "added_at" },
+      "columns": ["patient_id", "practitioner_id", "urgent", "added_at", "status"],
+      "presets": [{ "label": "Waiting", "filter": { "status": "waiting" }, "default": true },
+                  { "label": "Offered", "filter": { "status": "offered" } },
+                  { "label": "Urgent", "filter": { "urgent": true } }, { "label": "All", "filter": {} }]
+    }
+  }
+}

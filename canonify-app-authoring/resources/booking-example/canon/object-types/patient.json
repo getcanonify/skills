@@ -1,0 +1,65 @@
+{
+  "name": "patient",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "patient",
+    "description": "A patient and the practitioner who leads their care.",
+    "idPrefix": "pat",
+    "properties": {
+      "name": {
+        "kind": "mapped",
+        "column": "name",
+        "type": "string",
+        "label": "Patient"
+      },
+      "lead_practitioner_id": {
+        "kind": "mapped",
+        "column": "lead_practitioner_id",
+        "type": "string",
+        "label": "Lead"
+      },
+      "lead_member_id": {
+        "kind": "derived",
+        "type": "string",
+        "label": "Lead member",
+        "hidden": true,
+        "expression": "SELECT p.member_id FROM practitioner p WHERE p.id = patient.lead_practitioner_id"
+      }
+    },
+    "links": {
+      "lead": {
+        "target": "practitioner",
+        "cardinality": "one",
+        "via": "lead_practitioner_id",
+        "fk_on": "source"
+      },
+      "appointments": {
+        "target": "appointment",
+        "cardinality": "many",
+        "via": "patient_id"
+      },
+      "series": {
+        "target": "series",
+        "cardinality": "many",
+        "via": "patient_id"
+      },
+      "waitlist": {
+        "target": "waitlist_entry",
+        "cardinality": "many",
+        "via": "patient_id"
+      },
+      "scans": {
+        "target": "scan",
+        "cardinality": "many",
+        "via": "patient_id",
+        "part_of": true
+      }
+    },
+    "display": {
+      "title": {
+        "property": "name"
+      }
+    }
+  }
+}

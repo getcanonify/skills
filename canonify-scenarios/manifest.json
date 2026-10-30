@@ -1,0 +1,17 @@
+{
+  "name": "canonify-scenarios",
+  "description": "How to write + run declarative Canonify scenarios (session.yaml) that prove an app slice end-to-end through the public Canon surface — live verification, not jsdom mocking. Read SKILL.md first (it covers running and reading failures), then the structure reference and the patterns.",
+  "version": "2.0.0",
+  "resources": [
+    {
+      "path": "resources/scenario-structure.md",
+      "title": "Scenario structure",
+      "description": "The session.yaml shape the runner accepts: name/principals/steps, principal kinds and roles under deny-by-default policy, the six step kinds (action / read / check / clock / orchestration / tick), each read verb's closed input keys, the $ref grammar, and the expect matcher grammar (equals / matches / length / count / contains)."
+    },
+    {
+      "path": "resources/scenario-patterns.md",
+      "title": "Scenario patterns",
+      "description": "Five complete, runnable sessions: a CRM slice, a state-machine lifecycle, an atomic multi-table action with an outbox hook, governance and FSM-guard denials, and bucketed / multi-series objects.aggregate reads."
+    }
+  ]
+}

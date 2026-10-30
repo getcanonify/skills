@@ -1,0 +1,27 @@
+{
+  "name": "waitlist.add",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "waitlist.add",
+    "description": "Put a patient on the waitlist, for one practitioner or any. Its subject is the patient, so the patient record offers it with the patient pre-bound.",
+    "object_type": "waitlist_entry",
+    "input": {
+      "patient_id": { "type": "ref patient" },
+      "practitioner_id": { "type": "ref practitioner", "optional": true, "nullable": true },
+      "urgent": { "type": "boolean", "optional": true, "nullable": true }
+    },
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "subject": "patient_id",
+    "handler": {
+      "steps": [
+        { "op": "insert", "object": "waitlist_entry", "as": "entry",
+          "values": { "patient_id": "$input.patient_id", "practitioner_id": "$input.practitioner_id",
+                      "urgent": "$input.urgent", "added_at": "$now" } }
+      ],
+      "returns": { "waitlist_entry_id": "$entry.id" }
+    },
+    "presentation": { "label": "Add to waitlist", "icon": "list-plus", "success": "Added to the waitlist." }
+  }
+}

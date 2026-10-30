@@ -1,0 +1,26 @@
+{
+  "name": "Analysis.status",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "kind": "state_machine",
+    "track": "customer",
+    "name": "Analysis.status",
+    "objectType": "analysis",
+    "property": "status",
+    "initial": "queued",
+    "states": {
+      "queued": { "label": "Queued", "meaning": "live" },
+      "running": { "label": "Running", "meaning": "live" },
+      "complete": { "label": "Ready to release", "meaning": "live" },
+      "released": { "label": "Released", "meaning": "terminal-good", "terminal": true },
+      "cancelled": { "label": "Cancelled", "meaning": "sink", "terminal": true }
+    },
+    "transitions": [
+      { "via": "analysis.start", "from": ["queued"], "to": "running" },
+      { "via": "analysis.complete", "from": ["running"], "to": "complete" },
+      { "via": "analysis.release", "from": ["complete"], "to": "released", "stamps": { "at": "released_at" } },
+      { "via": "analysis.cancel", "from": ["queued", "running", "complete"], "to": "cancelled" }
+    ]
+  }
+}

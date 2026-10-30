@@ -1,0 +1,27 @@
+{
+  "name": "canonify-viewspecs",
+  "description": "Author Canonify ViewSpecs — the declarative UI primitive. Compose catalog pieces (ObjectTypes + ActionTypes) into transport-agnostic views built from 11 block types (table, detail, panel, button, composite, metric, chart, file, board, calendar, queue), then declare them to an org via view_specs.declare. Read SKILL.md first, then the cheatsheet.",
+  "version": "2.0.0",
+  "resources": [
+    {
+      "path": "resources/viewspec-cheatsheet.md",
+      "title": "ViewSpec cheatsheet — start here",
+      "description": "One page: every block type and every field (checked against the schema), the source/column/filter/date grammar in one table, the most common declare errors with their fix."
+    },
+    {
+      "path": "resources/viewspec-block-types.md",
+      "title": "The 11 block types",
+      "description": "The one block reference: table (presets, row actions, totals, row groups, grouped summaries), detail (the master-detail record surface, header, links, mobile states, row-click routing), panel, button, composite (layout, reader filters, heading rules), metric, chart, file, board, calendar and queue — each with JSON and what the renderer decides."
+    },
+    {
+      "path": "resources/viewspec-binding-and-sources.md",
+      "title": "Binding and sources",
+      "description": "The one binding and grammar reference: record and aggregate sources, time buckets, window and compare (and the raw aggregate read on every surface), link paths, expand and derived measures, the filter grammar, $principal, column refs, format and emphasize, and the $context render context."
+    },
+    {
+      "path": "resources/viewspec-recipes.md",
+      "title": "Recipes",
+      "description": "Copy-and-adapt screens: the seven moves from renders to reads well, a record page with header and metric strip, a scannable list, a dashboard with a reader filter row, a board and queue workflow, and a form with a conditional action."
+    }
+  ]
+}

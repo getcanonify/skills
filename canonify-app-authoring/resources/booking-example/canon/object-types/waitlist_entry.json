@@ -1,0 +1,88 @@
+{
+  "name": "waitlist_entry",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "waitlist_entry",
+    "description": "A patient waiting for a freed slot, with the practitioner they want (none: any). Urgent first, then the longest waiting.",
+    "idPrefix": "wle",
+    "properties": {
+      "patient_id": {
+        "kind": "mapped",
+        "column": "patient_id",
+        "type": "string",
+        "label": "Patient"
+      },
+      "practitioner_id": {
+        "kind": "mapped",
+        "column": "practitioner_id",
+        "type": "string",
+        "label": "Practitioner",
+        "nullable": true
+      },
+      "urgent": {
+        "kind": "mapped",
+        "column": "urgent",
+        "type": "boolean",
+        "label": "Urgent",
+        "nullable": true
+      },
+      "added_at": {
+        "kind": "mapped",
+        "column": "added_at",
+        "type": "timestamp",
+        "label": "Added"
+      },
+      "rank": {
+        "kind": "derived",
+        "type": "number",
+        "label": "Rank",
+        "hidden": true,
+        "expression": "CASE WHEN waitlist_entry.urgent = 1 THEN 0 ELSE 1 END"
+      },
+      "status": {
+        "kind": "mapped",
+        "column": "status",
+        "type": "enum",
+        "label": "Status",
+        "values": [
+          "waiting",
+          "offered",
+          "booked"
+        ],
+        "valueLabels": {
+          "waiting": "Waiting",
+          "offered": "Offered",
+          "booked": "Booked"
+        },
+        "valueColors": {
+          "waiting": "info",
+          "offered": "warm",
+          "booked": "good"
+        }
+      }
+    },
+    "links": {
+      "patient": {
+        "target": "patient",
+        "cardinality": "one",
+        "via": "patient_id",
+        "fk_on": "source"
+      },
+      "practitioner": {
+        "target": "practitioner",
+        "cardinality": "one",
+        "via": "practitioner_id",
+        "fk_on": "source"
+      }
+    },
+    "display": {
+      "title": {
+        "derived": {
+          "via": "patient_id"
+        }
+      },
+      "statusProperty": "status"
+    }
+  }
+}

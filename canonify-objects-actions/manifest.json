@@ -1,0 +1,62 @@
+{
+  "name": "canonify-objects-actions",
+  "description": "The reference for Canonify's catalog mechanics: tables and auto-CRUD, bulk import, ObjectTypes (properties, enums, display, visibility, temporal), links and compound objects, ActionTypes (input, governance, idempotency, presentation), the handler DSL, state machines, schedules, and the built-in e-signature and outbox actions. Every JSON example decodes against the live validators. Read after the base `canonify` skill.",
+  "version": "2.0.0",
+  "resources": [
+    {
+      "path": "resources/tables-and-import.md",
+      "title": "Tables, auto-CRUD and import",
+      "description": "schema.propose_migration and its column conventions, what auto-CRUD generates (compound roots included), generated-update semantics, retyping a column, and bulk loading with objects.import."
+    },
+    {
+      "path": "resources/object-property-types.md",
+      "title": "ObjectTypes — catalog.refine_object_type",
+      "description": "Every refinement field: mapped and derived properties, the ten property types, the JSON/boolean wire contract, enum narrowing, the valueColors token table, valueLabels, currency, labels, display (titles, forms, lists, action overrides), hidden and confidential, temporal effective dating, and re-refine hashes."
+    },
+    {
+      "path": "resources/files.md",
+      "title": "Files — upload, attach, seed and show",
+      "description": "Where a record holds a file (a file property, an attachment kind, the record itself), seeding many files in one objects.import call ($file, $attachments, inline base64) and its per-file errors, uploading one over REST (POST /v1/files, the attach route), reading and downloading, and showing files in SpringML."
+    },
+    {
+      "path": "resources/object-links-and-cardinality.md",
+      "title": "Links, cardinality, compound objects",
+      "description": "Typed links (target, via, fk_on, cardinality), the on_delete policy honoured by every delete path, and compound objects: part_of rules, rollups, parts_frozen_when."
+    },
+    {
+      "path": "resources/actions-input-governance.md",
+      "title": "ActionTypes — actions.declare",
+      "description": "Every declaration field: the input-type table, subject, governance and operation, unattended authority for schedules and reactions, the external-write target, idempotency postures and their windows, the transition marker, presentation, and actions.update."
+    },
+    {
+      "path": "resources/actions-handler-patterns.md",
+      "title": "The handler DSL",
+      "description": "Refs, the eleven step kinds, the lead.convert example, predicates and where operators, nullable bindings, value expressions and dates, aggregates, set fan-out, fragments, on_fail, and every type-check error."
+    },
+    {
+      "path": "resources/state-machines.md",
+      "title": "State machines — state_machines.register",
+      "description": "Declaring a machine over an enum property, what a transition marker buys (guard, state write, hooks), moving a set in one call, why the bound property belongs to the machine, cross-validation and re-register hashes."
+    },
+    {
+      "path": "resources/access-policies.md",
+      "title": "Access — roles, groups and policies",
+      "description": "The member default, groups (groups/<name>.json in the bundle; add_member is user-only), the policies/<name>.json shape, row filters incl. :principal.groups and the via_link / exists link-through forms, governance.operation as a group gate, invokable: false and nav omission, and a runnable expense-claims example."
+    },
+    {
+      "path": "resources/schedules-and-org-admin.md",
+      "title": "Schedules & org lifecycle",
+      "description": "Declaring and operating schedules and reactions (schedules.declare, list, describe, history, run) and the org.* lifecycle actions (update, export, restore, delete, leave)."
+    },
+    {
+      "path": "resources/esign-actions.md",
+      "title": "E-signature actions",
+      "description": "The built-in e-signature actions you invoke: signature_request, signature, signature_envelope and member_signature — inputs, statuses, link_token redaction, consent and server-derived evidence, and the terminal lifecycle."
+    },
+    {
+      "path": "resources/outbox-actions.md",
+      "title": "Outbox actions",
+      "description": "outbox.inspect (queue health and rows, payload never returned, last_error redacted) and outbox.requeue (retry a deadletter or reclaim an abandoned claim), with their refusals. Requires manage authority."
+    }
+  ]
+}

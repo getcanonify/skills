@@ -1,0 +1,21 @@
+{
+  "name": "working_hours",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "working_hours",
+    "description": "A practitioner's hours on one weekday, as wall-clock times.",
+    "idPrefix": "wh",
+    "properties": {
+      "practitioner_id": { "kind": "mapped", "column": "practitioner_id", "type": "string", "label": "Practitioner" },
+      "weekday": { "kind": "mapped", "column": "weekday", "type": "enum", "label": "Weekday",
+                   "values": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+      "from_time": { "kind": "mapped", "column": "from_time", "type": "time", "label": "From" },
+      "to_time": { "kind": "mapped", "column": "to_time", "type": "time", "label": "To" }
+    },
+    "links": {
+      "practitioner": { "target": "practitioner", "cardinality": "one", "via": "practitioner_id", "fk_on": "source" }
+    },
+    "display": { "title": { "template": "{practitioner_id} {weekday}" } }
+  }
+}

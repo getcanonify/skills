@@ -1,0 +1,28 @@
+{
+  "name": "Appointment.schedule",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Schedule",
+    "icon": "calendar-clock",
+    "object_type": "appointment",
+    "spec": {
+      "type": "calendar",
+      "source": { "objectType": "appointment" },
+      "presets": [{ "label": "Active", "filter": { "status": { "neq": "cancelled" } }, "default": true },
+                  { "label": "Show cancelled", "filter": {} }],
+      "start": "starts_at",
+      "end": "ends_at",
+      "resource": "practitioner_id",
+      "resources": { "source": { "objectType": "practitioner", "sort": "name" } },
+      "hours": { "from": "07:00", "to": "19:00" },
+      "slot": 15,
+      "columns": ["patient_id", "room_id", "status"],
+      "available": { "source": { "objectType": "working_hours" }, "resource": "practitioner_id",
+                     "weekday": "weekday", "from": "from_time", "to": "to_time" },
+      "unavailable": [{ "source": { "objectType": "calendar_day", "filter": { "closed": true } }, "from": "date" }],
+      "capacity": { "by": "room_id", "of": "capacity", "source": { "objectType": "room", "sort": "name" } },
+      "createAction": "appointment.book", "moveAction": "appointment.move"
+    }
+  }
+}

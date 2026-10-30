@@ -1,0 +1,24 @@
+{
+  "name": "@canonify/skills",
+  "metadata": {
+    "pluginRoot": "."
+  },
+  "plugins": [
+    {
+      "name": "canonify-skills",
+      "source": ".",
+      "skills": [
+        "./canonify",
+        "./canonify-app-authoring",
+        "./canonify-app-lifecycle",
+        "./canonify-domain-modelling",
+        "./canonify-esign-sender",
+        "./canonify-isomorphism",
+        "./canonify-objects-actions",
+        "./canonify-scenarios",
+        "./canonify-springml",
+        "./canonify-viewspecs"
+      ]
+    }
+  ]
+}

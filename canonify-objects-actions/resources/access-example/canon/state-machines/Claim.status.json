@@ -1,0 +1,18 @@
+{
+  "name": "Claim.status",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "kind": "state_machine",
+    "track": "customer",
+    "name": "Claim.status",
+    "objectType": "claim",
+    "property": "status",
+    "initial": "submitted",
+    "states": {
+      "submitted": { "label": "Submitted", "meaning": "live" },
+      "approved": { "label": "Approved", "meaning": "terminal-good", "terminal": true }
+    },
+    "transitions": [{ "via": "claim.approve", "from": ["submitted"], "to": "approved" }]
+  }
+}

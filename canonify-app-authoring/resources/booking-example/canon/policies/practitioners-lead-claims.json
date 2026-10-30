@@ -1,0 +1,11 @@
+{
+  "name": "practitioners-lead-claims",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "group", "group": "practitioners" },
+    "resource": { "object_type": "claim" },
+    "operations": ["get", "list", "navigate", "aggregate"],
+    "row_filter": "lead_member_id = :principal.id"
+  }
+}
