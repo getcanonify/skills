@@ -1,0 +1,11 @@
+{
+  "name": "practitioners-lead-patients",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "group", "group": "practitioners" },
+    "resource": { "object_type": "patient" },
+    "operations": ["get", "list", "navigate", "aggregate"],
+    "row_filter": "{\"via_link\": \"lead\", \"where\": \"member_id = :principal.id\"}"
+  }
+}

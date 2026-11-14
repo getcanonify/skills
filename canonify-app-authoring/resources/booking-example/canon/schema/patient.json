@@ -1,0 +1,4 @@
+{
+  "table": "patient",
+  "sql": "CREATE TABLE patient (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  lead_practitioner_id TEXT NOT NULL REFERENCES practitioner(id),\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

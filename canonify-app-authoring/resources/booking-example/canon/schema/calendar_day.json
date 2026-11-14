@@ -1,0 +1,4 @@
+{
+  "table": "calendar_day",
+  "sql": "CREATE TABLE calendar_day (\n  id TEXT PRIMARY KEY,\n  date TEXT NOT NULL UNIQUE,\n  weekday TEXT NOT NULL,\n  n INTEGER NOT NULL UNIQUE,\n  starts_at TEXT NOT NULL,\n  closed INTEGER NOT NULL DEFAULT 0,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

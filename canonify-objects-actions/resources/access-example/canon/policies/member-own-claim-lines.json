@@ -1,0 +1,11 @@
+{
+  "name": "member-own-claim-lines",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "role", "role": "member" },
+    "resource": { "object_type": "claim_line" },
+    "operations": ["get", "list", "navigate", "aggregate"],
+    "row_filter": "{\"via_link\": \"claim\", \"where\": \"submitted_by = :principal.id\"}"
+  }
+}

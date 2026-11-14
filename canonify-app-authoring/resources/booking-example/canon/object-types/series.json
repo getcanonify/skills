@@ -1,0 +1,104 @@
+{
+  "name": "series",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "series",
+    "description": "A weekly repeat: Plan stores one series_date per chosen weekday from first_start until occurrences dates are used (a closed date counts); Book dates books them.",
+    "idPrefix": "ser",
+    "properties": {
+      "patient_id": {
+        "kind": "mapped",
+        "column": "patient_id",
+        "type": "string",
+        "label": "Patient"
+      },
+      "practitioner_id": {
+        "kind": "mapped",
+        "column": "practitioner_id",
+        "type": "string",
+        "label": "Practitioner"
+      },
+      "room_id": {
+        "kind": "mapped",
+        "column": "room_id",
+        "type": "string",
+        "label": "Room"
+      },
+      "weekdays": {
+        "kind": "mapped",
+        "column": "weekdays",
+        "type": "set<enum>",
+        "label": "Weekdays",
+        "values": [
+          "mon",
+          "tue",
+          "wed",
+          "thu",
+          "fri",
+          "sat",
+          "sun"
+        ],
+        "valueLabels": {
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat",
+          "sun": "Sun"
+        }
+      },
+      "first_start": {
+        "kind": "mapped",
+        "column": "first_start",
+        "type": "timestamp",
+        "label": "First session"
+      },
+      "minutes": {
+        "kind": "mapped",
+        "column": "minutes",
+        "type": "number",
+        "label": "Minutes"
+      },
+      "occurrences": {
+        "kind": "mapped",
+        "column": "occurrences",
+        "type": "number",
+        "label": "Occurrences"
+      }
+    },
+    "links": {
+      "patient": {
+        "target": "patient",
+        "cardinality": "one",
+        "via": "patient_id",
+        "fk_on": "source"
+      },
+      "practitioner": {
+        "target": "practitioner",
+        "cardinality": "one",
+        "via": "practitioner_id",
+        "fk_on": "source"
+      },
+      "room": {
+        "target": "room",
+        "cardinality": "one",
+        "via": "room_id",
+        "fk_on": "source"
+      },
+      "dates": {
+        "target": "series_date",
+        "cardinality": "many",
+        "via": "series_id",
+        "on_delete": "cascade",
+        "part_of": true
+      }
+    },
+    "display": {
+      "title": {
+        "template": "{weekdays} from {first_start}"
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Analysis.outgoing",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Outgoing",
+    "icon": "inbox",
+    "object_type": "analysis",
+    "spec": {
+      "type": "queue",
+      "title": "Ready to release",
+      "why": "Finished reports waiting to go out — longest-due first. Release to clear.",
+      "source": { "objectType": "analysis", "filter": { "status": "complete" } },
+      "order": [{ "field": "due_at", "dir": "asc" }],
+      "buckets": { "from": "due_at" },
+      "row": { "title": "title", "subtitle": "client_id" },
+      "actions": {
+        "primary": { "action": "analysis.release", "label": "Release", "key": "Enter" }
+      },
+      "empty": { "title": "Nothing waiting", "body": "Every finished report has been released." }
+    }
+  }
+}

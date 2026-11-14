@@ -1,0 +1,231 @@
+{
+  "name": "appointment",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "appointment",
+    "description": "One booked session; starts_at / ends_at are instants, shown in the org zone. A series occurrence keeps its occurrence_date when moved.",
+    "idPrefix": "apt",
+    "defaults": {
+      "create": false,
+      "update": false,
+      "delete": false
+    },
+    "properties": {
+      "patient_id": {
+        "kind": "mapped",
+        "column": "patient_id",
+        "type": "string",
+        "label": "Patient"
+      },
+      "practitioner_id": {
+        "kind": "mapped",
+        "column": "practitioner_id",
+        "type": "string",
+        "label": "Practitioner"
+      },
+      "room_id": {
+        "kind": "mapped",
+        "column": "room_id",
+        "type": "string",
+        "label": "Room"
+      },
+      "device_id": {
+        "kind": "mapped",
+        "column": "device_id",
+        "type": "string",
+        "label": "Device",
+        "nullable": true
+      },
+      "starts_at": {
+        "kind": "mapped",
+        "column": "starts_at",
+        "type": "timestamp",
+        "label": "Starts"
+      },
+      "ends_at": {
+        "kind": "mapped",
+        "column": "ends_at",
+        "type": "timestamp",
+        "label": "Ends"
+      },
+      "minutes": {
+        "kind": "mapped",
+        "column": "minutes",
+        "type": "number",
+        "label": "Minutes"
+      },
+      "fee": {
+        "kind": "mapped",
+        "column": "fee",
+        "type": "money",
+        "label": "Fee",
+        "currency": "EUR"
+      },
+      "status": {
+        "kind": "mapped",
+        "column": "status",
+        "type": "enum",
+        "label": "Status",
+        "values": [
+          "booked",
+          "checked_in",
+          "attended",
+          "no_show",
+          "cancelled"
+        ],
+        "valueLabels": {
+          "booked": "Booked",
+          "checked_in": "Checked in",
+          "attended": "Attended",
+          "no_show": "No-show",
+          "cancelled": "Cancelled"
+        },
+        "valueColors": {
+          "booked": "info",
+          "checked_in": "warm",
+          "attended": "good",
+          "no_show": "hot",
+          "cancelled": "neutral"
+        }
+      },
+      "series_id": {
+        "kind": "mapped",
+        "column": "series_id",
+        "type": "string",
+        "label": "Series",
+        "nullable": true
+      },
+      "occurrence_date": {
+        "kind": "mapped",
+        "column": "occurrence_date",
+        "type": "date",
+        "label": "Occurrence",
+        "nullable": true
+      },
+      "moved": {
+        "kind": "mapped",
+        "column": "moved",
+        "type": "boolean",
+        "label": "Moved"
+      },
+      "cancel_reason": {
+        "kind": "mapped",
+        "column": "cancel_reason",
+        "type": "string",
+        "label": "Reason",
+        "nullable": true
+      },
+      "flags": {
+        "kind": "mapped",
+        "column": "flags",
+        "type": "set<enum>",
+        "label": "Red flags",
+        "nullable": true,
+        "values": [
+          "fever",
+          "numbness",
+          "weight_loss",
+          "night_pain"
+        ],
+        "valueLabels": {
+          "fever": "Fever",
+          "numbness": "Numbness",
+          "weight_loss": "Weight loss",
+          "night_pain": "Night pain"
+        }
+      },
+      "action_taken": {
+        "kind": "mapped",
+        "column": "action_taken",
+        "type": "string",
+        "label": "Action taken",
+        "nullable": true
+      },
+      "day_part": {
+        "kind": "derived",
+        "type": "enum",
+        "label": "When",
+        "values": [
+          "overdue",
+          "now",
+          "next_hour",
+          "later",
+          "done"
+        ],
+        "valueLabels": {
+          "overdue": "Overdue",
+          "now": "Now",
+          "next_hour": "Next hour",
+          "later": "Later",
+          "done": "Done"
+        },
+        "expression": "CASE WHEN appointment.status IN ('attended', 'no_show', 'cancelled') THEN 'done' WHEN appointment.status = 'checked_in' THEN 'now' WHEN datetime(appointment.starts_at) <= datetime(:now) THEN 'overdue' WHEN datetime(appointment.starts_at) <= datetime(:now, '+1 hour') THEN 'next_hour' ELSE 'later' END"
+      },
+      "cover_member_id": {
+        "kind": "derived",
+        "type": "string",
+        "label": "Covering member",
+        "hidden": true,
+        "expression": "SELECT p.member_id FROM practitioner p WHERE p.id = appointment.practitioner_id AND appointment.status <> 'cancelled'"
+      },
+      "on_claim": {
+        "kind": "derived",
+        "type": "boolean",
+        "label": "On a claim",
+        "expression": "EXISTS (SELECT 1 FROM claim_line l WHERE l.appointment_id = appointment.id)"
+      }
+    },
+    "links": {
+      "patient": {
+        "target": "patient",
+        "cardinality": "one",
+        "via": "patient_id",
+        "fk_on": "source"
+      },
+      "practitioner": {
+        "target": "practitioner",
+        "cardinality": "one",
+        "via": "practitioner_id",
+        "fk_on": "source"
+      },
+      "room": {
+        "target": "room",
+        "cardinality": "one",
+        "via": "room_id",
+        "fk_on": "source"
+      },
+      "device": {
+        "target": "device",
+        "cardinality": "one",
+        "via": "device_id",
+        "fk_on": "source"
+      },
+      "series": {
+        "target": "series",
+        "cardinality": "one",
+        "via": "series_id",
+        "fk_on": "source"
+      },
+      "notes": {
+        "target": "session_note",
+        "cardinality": "many",
+        "via": "appointment_id",
+        "part_of": true
+      }
+    },
+    "display": {
+      "title": {
+        "template": "{patient_id} {starts_at}"
+      },
+      "statusProperty": "status"
+    },
+    "rollups": {
+      "has_note": {
+        "link": "notes",
+        "agg": "exists",
+        "label": "Note written"
+      }
+    }
+  }
+}

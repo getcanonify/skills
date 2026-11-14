@@ -1,0 +1,49 @@
+{
+  "name": "Client.directory",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Clients",
+    "icon": "users",
+    "object_type": "client",
+    "spec": {
+      "type": "composite",
+      "children": [
+        {
+          "type": "table",
+          "title": "Clients",
+          "source": { "objectType": "client", "sort": "name" },
+          "columns": [
+            { "ref": "name", "sortable": true },
+            "plan",
+            "email",
+            { "ref": "analyses.count", "label": "Analyses" },
+            { "ref": "analyses.sum:revenue", "label": "Revenue" }
+          ],
+          "presets": [
+            { "label": "Contract", "filter": { "plan": "contract" } },
+            { "label": "Partner", "filter": { "plan": "partner" } }
+          ]
+        },
+        {
+          "type": "detail",
+          "source": { "objectType": "client" },
+          "header": {
+            "title": "name",
+            "subtitle": "{email} · {phone}",
+            "status": "plan",
+            "metrics": [
+              { "ref": "analyses.count", "label": "Analyses" },
+              { "ref": "analyses.sum:revenue", "label": "Revenue" }
+            ]
+          },
+          "properties": ["email", "phone", "plan", "created_at"],
+          "links": [
+            { "link": "analyses", "as": "tab", "label": "Analyses", "sort": "-due_at" },
+            { "link": "samples", "as": "tab", "label": "Samples" }
+          ]
+        }
+      ]
+    }
+  }
+}

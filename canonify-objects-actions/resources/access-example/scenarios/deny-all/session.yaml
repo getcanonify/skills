@@ -1,0 +1,51 @@
+name: deny-all
+description: >
+  The read bar: the warehouse group may not read credit holds (`mode: deny`),
+  so every read of one is refused to a warehouse member, while a member
+  outside the group reads them all.
+
+principals:
+  owner:
+    kind: user
+    id: usr_owner
+    org_id: org_test
+  ana:
+    kind: user
+    id: usr_ana
+    org_id: org_test
+    roles: [member]
+    groups: [cph]
+  wes:
+    kind: user
+    id: usr_wes
+    org_id: org_test
+    roles: [member]
+    groups: [warehouse]
+
+steps:
+  - action: credit_hold.create
+    principal: owner
+    input: { customer: Nordlys ApS, reason: Overdue 90 days }
+    bind: nordlys
+  - action: credit_hold.create
+    principal: owner
+    input: { customer: Fjord A/S, reason: Disputed invoice }
+
+  - read: objects.list
+    principal: ana
+    input: { type: credit_hold }
+    expect: { data: { length: 2 } }
+
+  # The bar refuses every read verb, and no grant widens it.
+  - read: objects.list
+    principal: wes
+    input: { type: credit_hold }
+    expect: { error: { code: FORBIDDEN } }
+  - read: objects.aggregate
+    principal: wes
+    input: { type: credit_hold, op: count }
+    expect: { error: { code: FORBIDDEN } }
+  - action: credit_hold.read
+    principal: wes
+    input: { id: $nordlys.id }
+    expect: { error: { code: FORBIDDEN } }

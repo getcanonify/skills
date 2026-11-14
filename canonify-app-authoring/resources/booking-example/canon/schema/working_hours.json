@@ -1,0 +1,4 @@
+{
+  "table": "working_hours",
+  "sql": "CREATE TABLE working_hours (\n  id TEXT PRIMARY KEY,\n  practitioner_id TEXT NOT NULL REFERENCES practitioner(id),\n  weekday TEXT NOT NULL,\n  from_time TIME NOT NULL,\n  to_time TIME NOT NULL,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

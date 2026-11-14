@@ -1,0 +1,65 @@
+{
+  "name": "claim_line",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "claim_line",
+    "description": "One attended session on a claim: what was claimed and, once decided, what the insurer approved.",
+    "idPrefix": "cln",
+    "defaults": {
+      "create": false,
+      "update": false,
+      "delete": false
+    },
+    "properties": {
+      "claim_id": {
+        "kind": "mapped",
+        "column": "claim_id",
+        "type": "string",
+        "label": "Claim"
+      },
+      "appointment_id": {
+        "kind": "mapped",
+        "column": "appointment_id",
+        "type": "string",
+        "label": "Session"
+      },
+      "claimed": {
+        "kind": "mapped",
+        "column": "claimed",
+        "type": "money",
+        "label": "Claimed",
+        "currency": "EUR"
+      },
+      "approved": {
+        "kind": "mapped",
+        "column": "approved",
+        "type": "money",
+        "label": "Approved",
+        "currency": "EUR",
+        "nullable": true
+      }
+    },
+    "links": {
+      "claim": {
+        "target": "claim",
+        "cardinality": "one",
+        "via": "claim_id",
+        "fk_on": "source"
+      },
+      "appointment": {
+        "target": "appointment",
+        "cardinality": "one",
+        "via": "appointment_id",
+        "fk_on": "source"
+      }
+    },
+    "display": {
+      "title": {
+        "derived": {
+          "via": "appointment_id"
+        }
+      }
+    }
+  }
+}

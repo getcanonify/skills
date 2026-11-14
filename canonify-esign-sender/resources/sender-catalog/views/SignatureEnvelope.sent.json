@@ -1,0 +1,29 @@
+{
+  "definition": {
+    "icon": "send",
+    "object_type": "signature_envelope",
+    "spec": {
+      "columns": ["title", "status", "decline_reason"],
+      "rowActions": [
+        {
+          "action": "signature_envelope.void",
+          "label": "Void",
+          "presetParams": {
+            "envelope_id": "$row.id"
+          }
+        }
+      ],
+      "source": {
+        "filter": {
+          "creator_account_id": "$principal"
+        },
+        "objectType": "signature_envelope"
+      },
+      "type": "table"
+    },
+    "title": "Sent agreements"
+  },
+  "managed_by": "managed",
+  "name": "SignatureEnvelope.sent",
+  "source_ref": "canonify-esign-sender@1"
+}

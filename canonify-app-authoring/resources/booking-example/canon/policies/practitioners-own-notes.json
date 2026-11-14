@@ -1,0 +1,11 @@
+{
+  "name": "practitioners-own-notes",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "group", "group": "practitioners" },
+    "resource": { "object_type": "session_note" },
+    "operations": ["get", "list", "navigate", "aggregate"],
+    "row_filter": "author_id = :principal.id"
+  }
+}

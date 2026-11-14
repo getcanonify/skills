@@ -1,0 +1,31 @@
+{
+  "name": "Analysis.list",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Analyses",
+    "icon": "list",
+    "object_type": "analysis",
+    "spec": {
+      "type": "table",
+      "source": { "objectType": "analysis", "sort": "due_at" },
+      "columns": [
+        { "ref": "title", "label": "Analysis", "sortable": true },
+        "status",
+        "client_id",
+        "sample_id",
+        { "ref": "due_at", "label": "Due", "sortable": true },
+        "priority",
+        "fee"
+      ],
+      "presets": [
+        { "label": "Open", "filter": { "status": { "in": ["queued", "running", "complete"] } } },
+        { "label": "Ready to release", "filter": { "status": "complete" } },
+        { "label": "Express", "filter": { "priority": "express" } }
+      ],
+      "rowActions": ["analysis.start", "analysis.complete", { "action": "analysis.release", "label": "Release" }],
+      "totals": ["fee"],
+      "page_size": 25
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "office-wall",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "role", "role": "member" },
+    "resource": { "object_type": "claim" },
+    "operations": ["get", "list", "navigate", "aggregate"],
+    "mode": "restrict",
+    "row_filter": "office IN :principal.groups"
+  }
+}

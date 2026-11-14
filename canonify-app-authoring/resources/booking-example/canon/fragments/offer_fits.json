@@ -1,0 +1,25 @@
+{
+  "name": "offer_fits",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "offer_fits",
+    "description": "Refuses a waiting entry that wants another practitioner, or was offered this slot before (its offer lapsed).",
+    "input": {
+      "entry_id": { "type": "string" },
+      "entry_practitioner_id": { "type": "string", "optional": true, "nullable": true },
+      "slot_id": { "type": "string" },
+      "slot_practitioner_id": { "type": "string" }
+    },
+    "steps": [
+      { "op": "assert", "when": { "any_of": [{ "ref": "$input.entry_practitioner_id", "absent": true },
+                                             { "ref": "$input.entry_practitioner_id", "eq": "$input.slot_practitioner_id" }] },
+        "else": { "code": "VALIDATION", "message": "Waits for another practitioner." } },
+      { "op": "read_optional", "object": "waitlist_offer", "as": "before",
+        "where": { "appointment_id": "$input.slot_id", "waitlist_entry_id": "$input.entry_id" } },
+      { "op": "assert", "when": { "ref": "$before.id", "absent": true },
+        "else": { "code": "VALIDATION", "message": "Was offered this slot already." } }
+    ],
+    "returns": { "entry_id": "$input.entry_id" }
+  }
+}

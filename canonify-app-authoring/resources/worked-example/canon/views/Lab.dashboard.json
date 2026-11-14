@@ -1,0 +1,109 @@
+{
+  "name": "Lab.dashboard",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Dashboard",
+    "icon": "layout-dashboard",
+    "object_type": "analysis",
+    "spec": {
+      "type": "composite",
+      "layout": "stack",
+      "children": [
+        {
+          "type": "composite",
+          "layout": "grid",
+          "children": [
+            {
+              "type": "metric",
+              "label": "Open analyses",
+              "source": {
+                "objectType": "analysis",
+                "aggregate": { "op": "count" },
+                "filter": { "status": { "in": ["queued", "running", "complete"] } }
+              }
+            },
+            {
+              "type": "metric",
+              "label": "Ready to release",
+              "source": {
+                "objectType": "analysis",
+                "aggregate": { "op": "count" },
+                "filter": { "status": "complete" }
+              }
+            },
+            {
+              "type": "metric",
+              "label": "Overdue",
+              "source": {
+                "objectType": "analysis",
+                "aggregate": { "op": "count" },
+                "filter": { "is_overdue": true }
+              }
+            },
+            {
+              "type": "metric",
+              "label": "Fees not yet invoiced",
+              "source": {
+                "objectType": "analysis",
+                "aggregate": { "op": "sum", "property": "fee" },
+                "filter": { "status": { "in": ["queued", "running", "complete"] } }
+              }
+            },
+            {
+              "type": "metric",
+              "label": "Revenue this month",
+              "source": {
+                "objectType": "analysis",
+                "aggregate": { "op": "sum", "property": "revenue" },
+                "groupBy": "released_at@month"
+              },
+              "window": { "last": 6 },
+              "compare": { "offset": { "period": "month", "periods": 1 } }
+            }
+          ]
+        },
+        {
+          "type": "chart",
+          "title": "Analyses by status",
+          "source": {
+            "objectType": "analysis",
+            "aggregate": { "op": "count" },
+            "groupBy": "status"
+          }
+        },
+        {
+          "type": "table",
+          "title": "Work by matrix",
+          "source": {
+            "objectType": "analysis",
+            "aggregate": { "op": "count" },
+            "groupBy": "sample.matrix"
+          },
+          "columns": [
+            "sample.matrix",
+            { "ref": "count", "label": "Analyses" },
+            { "ref": "sum:fee", "label": "Fees" },
+            { "ref": "avg:fee", "label": "Average fee" }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Due next",
+          "source": {
+            "objectType": "analysis",
+            "filter": { "status": { "in": ["queued", "running"] } },
+            "sort": "due_at"
+          },
+          "columns": [
+            { "ref": "title", "label": "Analysis" },
+            "status",
+            "client_id",
+            { "ref": "due_at", "label": "Due" }
+          ],
+          "page_size": 5
+        }
+      ]
+    }
+  }
+}

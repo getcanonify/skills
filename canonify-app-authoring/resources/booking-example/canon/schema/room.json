@@ -1,0 +1,4 @@
+{
+  "table": "room",
+  "sql": "CREATE TABLE room (\n  id TEXT PRIMARY KEY,\n  name TEXT NOT NULL,\n  capacity INTEGER NOT NULL DEFAULT 1,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

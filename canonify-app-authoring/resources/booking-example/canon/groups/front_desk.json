@@ -1,0 +1,10 @@
+{
+  "name": "front_desk",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "front_desk",
+    "label": "Front desk",
+    "description": "Books, runs the waitlist and records the insurer's claim decisions."
+  }
+}

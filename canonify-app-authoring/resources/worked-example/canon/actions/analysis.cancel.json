@@ -1,0 +1,36 @@
+{
+  "name": "analysis.cancel",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "analysis.cancel",
+    "description": "Cancel an analysis whose report has not been released.",
+    "object_type": "analysis",
+    "input": { "analysis_id": { "type": "ref analysis" } },
+    "subject": "analysis_id",
+    "governance": {
+      "requires_approval": false,
+      "allowed_principals": ["user", "agent", "service_account"]
+    },
+    "idempotency": "none",
+    "transition": {
+      "state_machine": "Analysis.status",
+      "from": ["queued", "running", "complete"],
+      "to": "cancelled"
+    },
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "analysis", "where": { "id": "$input.analysis_id" }, "as": "analysis" }
+      ],
+      "returns": { "analysis_id": "$analysis.id" }
+    },
+    "presentation": {
+      "label": "Cancel analysis",
+      "emphasis": "secondary",
+      "destructive": true,
+      "icon": "x",
+      "confirm": "Cancel this analysis?",
+      "success": "Analysis cancelled."
+    }
+  }
+}

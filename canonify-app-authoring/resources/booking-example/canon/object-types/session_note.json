@@ -1,0 +1,51 @@
+{
+  "name": "session_note",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "session_note",
+    "description": "A practitioner's note on an attended session; each practitioner reads only their own.",
+    "idPrefix": "snt",
+    "defaults": {
+      "create": false,
+      "update": false,
+      "delete": false
+    },
+    "properties": {
+      "appointment_id": {
+        "kind": "mapped",
+        "column": "appointment_id",
+        "type": "string",
+        "label": "Session"
+      },
+      "author_id": {
+        "kind": "mapped",
+        "column": "author_id",
+        "type": "string",
+        "label": "Author",
+        "hidden": true
+      },
+      "body": {
+        "kind": "mapped",
+        "column": "body",
+        "type": "string",
+        "label": "Note"
+      }
+    },
+    "links": {
+      "appointment": {
+        "target": "appointment",
+        "cardinality": "one",
+        "via": "appointment_id",
+        "fk_on": "source"
+      }
+    },
+    "display": {
+      "title": {
+        "derived": {
+          "via": "appointment_id"
+        }
+      }
+    }
+  }
+}

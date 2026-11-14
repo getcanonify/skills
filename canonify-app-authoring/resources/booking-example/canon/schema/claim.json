@@ -1,0 +1,4 @@
+{
+  "table": "claim",
+  "sql": "CREATE TABLE claim (\n  id TEXT PRIMARY KEY,\n  patient_id TEXT NOT NULL REFERENCES patient(id),\n  status TEXT NOT NULL DEFAULT 'draft',\n  reason TEXT,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

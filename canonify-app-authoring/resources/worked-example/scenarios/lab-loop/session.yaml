@@ -1,0 +1,166 @@
+name: lab-loop
+description: >
+  The worked example's business loop, end to end through the public surface:
+  seed clients, samples and one released analysis with objects.import, request
+  an analysis, walk it through the Analysis.status state machine, and check
+  the money snapshot and the FSM guard.
+
+principals:
+  agent:
+    kind: agent
+    id: agt_lab_example
+    org_id: org_test
+
+steps:
+  # Seed with objects.import, not one create per row: one atomic, audited call
+  # per batch of up to 500 rows. Rows keep the ids you give them (handy for ids
+  # from a system you migrate from), so children can name their parents —
+  # import parents first. Omit `id` and the platform generates one from the
+  # ObjectType's idPrefix (cli_…, smp_…).
+  - action: objects.import
+    input:
+      object_type: client
+      rows:
+        - { id: cli_nordvand, name: Nordvand Water, email: lab@nordvand.example, phone: '+45 12 34 56 78', plan: contract }
+        - { id: cli_holm, name: Holm Foods, email: qa@holm.example }
+    expect:
+      data: { object_type: client, imported: 2, skipped: 0 }
+
+  - action: objects.import
+    input:
+      object_type: sample
+      rows:
+        - { id: smp_nordvand_1, client_id: cli_nordvand, reference: W-0412, site: Harbour inlet, matrix: water }
+        - { id: smp_holm_1, client_id: cli_holm, reference: F-0088, site: Line 2, matrix: food }
+    expect:
+      data: { imported: 2 }
+
+  # History loads as history: last year's analysis arrives `released`, with its
+  # own created_at. analysis.request could not do that — a new row starts in
+  # the machine's initial state — and no hook or reaction runs for it.
+  - action: objects.import
+    input:
+      object_type: analysis
+      rows:
+        - id: ana_2025_0412
+          client_id: cli_holm
+          sample_id: smp_holm_1
+          title: Listeria screen
+          status: released
+          due_at: '2025-11-03T15:00:00.000Z'
+          fee: 45000
+          revenue: 45000
+          released_at: '2025-11-03T16:10:00.000Z'
+          created_at: '2025-11-01T08:12:00.000Z'
+    expect:
+      data: { imported: 1 }
+
+  - read: objects.get
+    input: { type: analysis, id: ana_2025_0412 }
+    expect:
+      data: { status: released, created_at: '2025-11-01T08:12:00.000Z' }
+
+  # presentation.inputFilters scopes the form's sample picker to the chosen
+  # client, and the invoke holds the id to the same scope: another client's
+  # sample answers NOT_FOUND on sample_id, exactly like a missing one, before
+  # any handler step runs. An analysis runs on the client's own sample, or not
+  # at all.
+  - action: analysis.request
+    input:
+      client_id: cli_holm
+      sample_id: smp_nordvand_1
+      title: Coliform count
+      due_at: '2026-10-19T12:00:00.000Z'
+      priority: standard
+      fee: 15000
+    expect:
+      error: { code: NOT_FOUND, details: { field: sample_id } }
+
+  # A money input is integer minor units on every surface: 125000 øre is
+  # DKK 1,250.00 (the input declares its currency, DKK). A fractional amount
+  # is refused, never rounded.
+  - action: analysis.request
+    input:
+      client_id: cli_nordvand
+      sample_id: smp_nordvand_1
+      title: Heavy metals panel
+      due_at: '2026-10-20T16:00:00.000Z'
+      priority: express
+      fee: 125000
+    bind: requested
+    expect:
+      data: { analysis_id: { matches: '^ana_' } }
+
+  - read: objects.get
+    input: { type: analysis, id: $requested.analysis_id }
+    expect:
+      data:
+        status: queued
+        client_id: cli_nordvand
+        fee: 125000
+        revenue: null
+
+  # The FSM guard: releasing an analysis that is not complete is refused.
+  - action: analysis.release
+    input: { analysis_id: $requested.analysis_id }
+    expect:
+      error: { code: INVALID_STATE }
+
+  - action: analysis.start
+    input: { analysis_id: $requested.analysis_id }
+  - action: analysis.complete
+    input: { analysis_id: $requested.analysis_id }
+  - action: analysis.release
+    input: { analysis_id: $requested.analysis_id }
+
+  # release stamped released_at and snapshotted the fee as revenue; the
+  # runtime wrote the state column (the handler never writes `status`).
+  - read: objects.get
+    input: { type: analysis, id: $requested.analysis_id }
+    expect:
+      data:
+        status: released
+        revenue: 125000
+        released_at: { matches: '^20' }
+
+  # Every surface reads the same numbers: one analysis, released, for this client.
+  - read: objects.navigate
+    input: { type: client, id: cli_nordvand, link: analyses }
+    expect:
+      data: { length: 1 }
+
+  # An aggregate names its unit: the sum is still øre, of DKK — the same
+  # minor units a record read returns, so every view formats it as DKK. The
+  # imported history counts like any other released analysis: 450 + 1,250 kr.
+  - read: objects.aggregate
+    input: { type: analysis, op: sum, property: revenue, filter: { status: released } }
+    expect:
+      data: { value: 170000, unit: { type: money, currency: DKK } }
+
+  # A terminal state is terminal: a released analysis cannot be cancelled.
+  - action: analysis.cancel
+    input: { analysis_id: $requested.analysis_id }
+    expect:
+      error: { code: INVALID_STATE }
+
+  # Derived properties read like columns: the VAT-inclusive fee is computed
+  # in øre and carries DKK; a released analysis is never overdue.
+  - read: objects.get
+    input: { type: analysis, id: ana_2025_0412 }
+    expect:
+      data: { fee_incl_vat: 56250, is_overdue: false }
+
+  # An open analysis whose due date has passed is overdue, and a derived
+  # boolean filters an aggregate like a stored one — the dashboard's Overdue tile.
+  - action: analysis.request
+    input:
+      client_id: cli_holm
+      sample_id: smp_holm_1
+      title: Allergen panel
+      due_at: '2025-06-02T09:00:00.000Z'
+      priority: standard
+      fee: 30000
+  - read: objects.aggregate
+    input: { type: analysis, op: count, filter: { is_overdue: true } }
+    expect:
+      data: { value: 1 }

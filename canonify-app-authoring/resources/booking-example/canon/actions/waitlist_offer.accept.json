@@ -1,0 +1,34 @@
+{
+  "name": "waitlist_offer.accept",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "waitlist_offer.accept",
+    "description": "The patient takes the offered slot before it expires: book it for them.",
+    "object_type": "waitlist_offer",
+    "input": { "waitlist_offer_id": { "type": "ref waitlist_offer" } },
+    "subject": "waitlist_offer_id",
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "waitlist_offer", "where": { "id": "$input.waitlist_offer_id" }, "as": "offer" },
+        { "op": "assert", "when": { "all_of": [{ "ref": "$offer.status", "eq": "open" }, { "ref": "$offer.expires_at", "gt": "$now" }] },
+          "else": { "code": "INVALID_STATE", "message": "This offer is no longer open." } },
+        { "op": "read", "object": "appointment", "where": { "id": "$offer.appointment_id" }, "as": "slot" },
+        { "op": "call", "fragment": "slot_free", "as": "free",
+          "with": { "practitioner_id": "$slot.practitioner_id", "room_id": "$slot.room_id", "device_id": "$slot.device_id",
+                    "starts_at": "$slot.starts_at", "ends_at": "$slot.ends_at", "exclude_id": "$slot.id" } },
+        { "op": "insert", "object": "appointment", "as": "appointment",
+          "values": { "patient_id": "$offer.patient_id", "practitioner_id": "$slot.practitioner_id", "room_id": "$slot.room_id",
+                      "device_id": "$slot.device_id", "starts_at": "$slot.starts_at", "ends_at": "$slot.ends_at",
+                      "minutes": "$slot.minutes" } },
+        { "op": "update", "object": "waitlist_offer", "where": { "id": "$offer.id" }, "set": { "status": "accepted" } },
+        { "op": "update", "object": "waitlist_entry", "where": { "id": "$offer.waitlist_entry_id" }, "set": { "status": "booked" } }
+      ],
+      "returns": { "appointment_id": "$appointment.id" }
+    },
+    "presentation": { "label": "Accept", "emphasis": "primary", "success": "Booked from the waitlist.",
+                      "showWhen": [{ "field": "status", "op": "eq", "value": "open" }] }
+  }
+}

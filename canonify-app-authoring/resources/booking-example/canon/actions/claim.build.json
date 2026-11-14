@@ -1,0 +1,26 @@
+{
+  "name": "claim.build",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "claim.build",
+    "description": "Put every attended session not yet on a claim on its patient's draft claim, making the draft when there is none. The claims board offers it as its create.",
+    "object_type": "claim",
+    "input": {},
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "handler": {
+      "steps": [
+        { "op": "read_many", "object": "appointment", "as": "todo", "where": { "status": "attended", "on_claim": false } },
+        { "op": "for_each", "in": "$todo", "as": "apt", "steps": [
+          { "op": "read_optional", "object": "claim", "as": "open", "where": { "patient_id": "$apt.patient_id", "status": "draft" } },
+          { "op": "insert", "object": "claim", "when": { "ref": "$open.id", "absent": true }, "values": { "patient_id": "$apt.patient_id" } },
+          { "op": "read", "object": "claim", "as": "draft", "where": { "patient_id": "$apt.patient_id", "status": "draft" } },
+          { "op": "insert", "object": "claim_line", "values": { "claim_id": "$draft.id", "appointment_id": "$apt.id", "claimed": "$apt.fee" } }
+        ] }
+      ],
+      "returns": { "sessions": "$todo.count" }
+    },
+    "presentation": { "label": "Build claims", "icon": "files", "success": "{returns.sessions} sessions put on draft claims." }
+  }
+}

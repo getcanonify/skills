@@ -1,0 +1,44 @@
+{
+  "name": "client",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "client",
+    "description": "A lab client. Sends in samples and orders analyses on them.",
+    "idPrefix": "cli",
+    "properties": {
+      "name": { "kind": "mapped", "column": "name", "type": "string", "label": "Name" },
+      "email": { "kind": "mapped", "column": "email", "type": "string", "label": "Email" },
+      "phone": { "kind": "mapped", "column": "phone", "type": "string", "label": "Phone", "nullable": true },
+      "plan": {
+        "kind": "mapped",
+        "column": "plan",
+        "type": "enum",
+        "label": "Plan",
+        "values": ["none", "contract", "partner"],
+        "valueLabels": { "none": "None", "contract": "Contract", "partner": "Partner" },
+        "valueColors": { "none": "neutral", "contract": "info", "partner": "cool" }
+      },
+      "created_at": { "kind": "mapped", "column": "created_at", "type": "timestamp", "label": "Client since" }
+    },
+    "links": {
+      "samples": { "target": "sample", "cardinality": "many", "via": "client_id", "on_delete": "restrict" },
+      "analyses": { "target": "analysis", "cardinality": "many", "via": "client_id", "on_delete": "restrict" }
+    },
+    "display": {
+      "entityKind": "Client",
+      "entityKindPlural": "Clients",
+      "icon": "building-2",
+      "title": { "property": "name" },
+      "subtitle": { "property": "email" },
+      "statusProperty": "plan",
+      "formFields": ["name", "email", "phone", "plan"],
+      "primaryProperties": ["name", "plan", "email", "phone"],
+      "searchable": ["name", "email", "phone"],
+      "actions": {
+        "client.create": { "label": "New client" },
+        "client.update": { "label": "Edit", "emphasis": "secondary" }
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "finance-reads-claims",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "group", "group": "finance" },
+    "resource": { "object_type": "claim" },
+    "operations": ["get", "list", "navigate", "aggregate"]
+  }
+}

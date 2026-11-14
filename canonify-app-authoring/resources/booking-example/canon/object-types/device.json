@@ -1,0 +1,23 @@
+{
+  "name": "device",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "device",
+    "description": "A device one appointment uses at a time.",
+    "idPrefix": "dev",
+    "properties": {
+      "name": {
+        "kind": "mapped",
+        "column": "name",
+        "type": "string",
+        "label": "Device"
+      }
+    },
+    "display": {
+      "title": {
+        "property": "name"
+      }
+    }
+  }
+}

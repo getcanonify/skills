@@ -1,0 +1,17 @@
+{
+  "name": "Patient.record",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Patients",
+    "icon": "user",
+    "object_type": "patient",
+    "spec": {
+      "type": "detail",
+      "source": { "objectType": "patient", "sort": "name" },
+      "links": [{ "link": "appointments", "as": "tab", "sort": "-starts_at" }, { "link": "series", "as": "tab" },
+                { "link": "scans", "as": "tab", "sort": "-taken_on" }, { "link": "waitlist", "as": "chip" }],
+      "files": { "include": ["scans"] }
+    }
+  }
+}

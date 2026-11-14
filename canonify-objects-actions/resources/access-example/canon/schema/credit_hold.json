@@ -1,0 +1,4 @@
+{
+  "table": "credit_hold",
+  "sql": "CREATE TABLE credit_hold (\n  id          TEXT PRIMARY KEY,\n  customer    TEXT NOT NULL,\n  reason      TEXT NOT NULL,\n  created_at  TEXT NOT NULL,\n  updated_at  TEXT NOT NULL\n)"
+}

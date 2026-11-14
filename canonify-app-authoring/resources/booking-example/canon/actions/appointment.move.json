@@ -1,0 +1,33 @@
+{
+  "name": "appointment.move",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "appointment.move",
+    "description": "Move a booked appointment to a free time. A series occurrence keeps its occurrence_date and is marked moved.",
+    "object_type": "appointment",
+    "input": {
+      "appointment_id": { "type": "ref appointment" },
+      "starts_at": { "type": "timestamp" }
+    },
+    "subject": "appointment_id",
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "appointment", "where": { "id": "$input.appointment_id" }, "as": "appointment" },
+        { "op": "assert", "when": { "ref": "$appointment.status", "eq": "booked" },
+          "else": { "code": "INVALID_STATE", "message": "Only a booked appointment moves." } },
+        { "op": "call", "fragment": "slot_free", "as": "free",
+          "with": { "practitioner_id": "$appointment.practitioner_id", "room_id": "$appointment.room_id",
+                    "device_id": "$appointment.device_id", "exclude_id": "$appointment.id", "starts_at": "$input.starts_at",
+                    "ends_at": { "op": "date_add", "left": "$input.starts_at", "right": { "n": "$appointment.minutes", "unit": "m" } } } },
+        { "op": "update", "object": "appointment", "where": { "id": "$appointment.id" },
+          "set": { "starts_at": "$input.starts_at", "moved": true,
+                   "ends_at": { "op": "date_add", "left": "$input.starts_at", "right": { "n": "$appointment.minutes", "unit": "m" } } } }
+      ],
+      "returns": { "appointment_id": "$appointment.id" }
+    },
+    "presentation": { "label": "Move", "success": "Moved." }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "sample",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "sample",
+    "description": "A sample a client sent in. Belongs to exactly one client.",
+    "idPrefix": "smp",
+    "properties": {
+      "client_id": { "kind": "mapped", "column": "client_id", "type": "string", "label": "Client" },
+      "reference": { "kind": "mapped", "column": "reference", "type": "string", "label": "Reference" },
+      "site": { "kind": "mapped", "column": "site", "type": "string", "label": "Site" },
+      "matrix": {
+        "kind": "mapped",
+        "column": "matrix",
+        "type": "enum",
+        "label": "Matrix",
+        "values": ["water", "soil", "food", "air", "swab"],
+        "valueLabels": { "water": "Water", "soil": "Soil", "food": "Food", "air": "Air", "swab": "Swab" }
+      }
+    },
+    "links": {
+      "client": { "target": "client", "cardinality": "one", "via": "client_id", "fk_on": "source" },
+      "analyses": { "target": "analysis", "cardinality": "many", "via": "sample_id", "on_delete": "restrict" }
+    },
+    "display": {
+      "entityKind": "Sample",
+      "entityKindPlural": "Samples",
+      "icon": "test-tube",
+      "title": { "template": "{reference} {site}" },
+      "subtitle": { "derived": { "via": "client_id" } },
+      "formFields": ["client_id", "reference", "site", "matrix"],
+      "primaryProperties": ["reference", "site", "matrix", "client_id"],
+      "actions": {
+        "sample.create": { "label": "Add sample" },
+        "sample.update": { "label": "Edit sample" }
+      }
+    }
+  }
+}

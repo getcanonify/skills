@@ -1,0 +1,81 @@
+{
+  "name": "analysis",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "analysis",
+    "description": "One analysis of one sample for one client. Analysis.status is FSM-governed. fee and revenue are integer øre (DKK minor units); revenue is snapshotted from fee when the report is released.",
+    "idPrefix": "ana",
+    "defaults": { "create": false, "delete": false },
+    "properties": {
+      "sample_id": { "kind": "mapped", "column": "sample_id", "type": "string", "label": "Sample" },
+      "client_id": { "kind": "mapped", "column": "client_id", "type": "string", "label": "Client" },
+      "title": { "kind": "mapped", "column": "title", "type": "string", "label": "Analysis" },
+      "status": {
+        "kind": "mapped",
+        "column": "status",
+        "type": "enum",
+        "label": "Status",
+        "values": ["queued", "running", "complete", "released", "cancelled"],
+        "valueLabels": {
+          "queued": "Queued",
+          "running": "Running",
+          "complete": "Ready to release",
+          "released": "Released",
+          "cancelled": "Cancelled"
+        },
+        "valueColors": {
+          "queued": "neutral",
+          "running": "info",
+          "complete": "good",
+          "released": "neutral",
+          "cancelled": "hot"
+        }
+      },
+      "priority": {
+        "kind": "mapped",
+        "column": "priority",
+        "type": "enum",
+        "label": "Priority",
+        "values": ["standard", "express"],
+        "valueLabels": { "standard": "Standard", "express": "Express" },
+        "valueColors": { "standard": "neutral", "express": "hot" }
+      },
+      "due_at": { "kind": "mapped", "column": "due_at", "type": "timestamp", "label": "Due" },
+      "fee": { "kind": "mapped", "column": "fee", "type": "money", "currency": "DKK", "label": "Fee" },
+      "revenue": { "kind": "mapped", "column": "revenue", "type": "money", "currency": "DKK", "label": "Revenue", "nullable": true },
+      "released_at": { "kind": "mapped", "column": "released_at", "type": "timestamp", "label": "Released", "nullable": true },
+      "fee_incl_vat": {
+        "kind": "derived",
+        "type": "money",
+        "currency": "DKK",
+        "label": "Fee incl. VAT",
+        "expression": "CAST(ROUND(analysis.fee * 1.25) AS INTEGER)"
+      },
+      "is_overdue": {
+        "kind": "derived",
+        "type": "boolean",
+        "label": "Overdue",
+        "expression": "CASE WHEN analysis.status IN ('queued', 'running') AND analysis.due_at < strftime('%Y-%m-%dT%H:%M:%fZ', :now) THEN 1 ELSE 0 END"
+      }
+    },
+    "links": {
+      "sample": { "target": "sample", "cardinality": "one", "via": "sample_id", "fk_on": "source" },
+      "client": { "target": "client", "cardinality": "one", "via": "client_id", "fk_on": "source" }
+    },
+    "display": {
+      "entityKind": "Analysis",
+      "entityKindPlural": "Analyses",
+      "icon": "flask-conical",
+      "title": { "property": "title" },
+      "subtitle": { "derived": { "via": "client_id" } },
+      "statusProperty": "status",
+      "formFields": ["title", "priority", "due_at", "fee"],
+      "primaryProperties": ["title", "status", "client_id", "sample_id", "due_at", "fee"],
+      "searchable": ["title", "status", "priority"],
+      "actions": {
+        "analysis.update": { "label": "Edit", "emphasis": "secondary" }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "analysis.start",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "analysis.start",
+    "description": "Load the sample on an instrument and start the run.",
+    "object_type": "analysis",
+    "input": { "analysis_id": { "type": "ref analysis" } },
+    "subject": "analysis_id",
+    "governance": {
+      "requires_approval": false,
+      "allowed_principals": ["user", "agent", "service_account"]
+    },
+    "idempotency": "none",
+    "transition": { "state_machine": "Analysis.status", "from": ["queued"], "to": "running" },
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "analysis", "where": { "id": "$input.analysis_id" }, "as": "analysis" }
+      ],
+      "returns": { "analysis_id": "$analysis.id" }
+    },
+    "presentation": {
+      "label": "Start run",
+      "emphasis": "primary",
+      "icon": "play",
+      "success": "Run started."
+    }
+  }
+}

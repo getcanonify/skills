@@ -1,0 +1,24 @@
+{
+  "name": "claim.approve",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "claim.approve",
+    "description": "Approve a submitted claim. Decided as the manage operation, which only the finance group is granted.",
+    "object_type": "claim",
+    "input": { "claim_id": { "type": "ref claim" } },
+    "subject": "claim_id",
+    "governance": {
+      "requires_approval": false,
+      "allowed_principals": ["user", "agent"],
+      "operation": "manage"
+    },
+    "idempotency": "none",
+    "transition": { "state_machine": "Claim.status", "from": ["submitted"], "to": "approved" },
+    "handler": {
+      "steps": [{ "op": "read", "object": "claim", "where": { "id": "$input.claim_id" }, "as": "claim" }],
+      "returns": { "claim_id": "$claim.id" }
+    },
+    "presentation": { "label": "Approve", "emphasis": "primary", "success": "Claim approved." }
+  }
+}

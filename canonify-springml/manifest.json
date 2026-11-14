@@ -1,0 +1,27 @@
+{
+  "name": "canonify-springml",
+  "description": "Build Canonify screens in SpringML: a .springml file of HTML-like JSX whose only elements are the 62 Spring UI names over data the page declares (Query, Record, Aggregate, State, Preview). The server evaluates the page for each reader and the renderer owns every pixel. Read SKILL.md first, then the language page, the component reference, verbs and forms, and the recipes.",
+  "version": "2.0.0",
+  "resources": [
+    {
+      "path": "resources/language.md",
+      "title": "The SpringML language",
+      "description": "The file, the data elements (Query as the collection and its handles, Record, Aggregate with day series, State, Preview), row predicates and render expressions, binding to the model's names, withheld columns, Rule C and not-run Queries, the readback and the refusals, caps."
+    },
+    {
+      "path": "resources/components.md",
+      "title": "Spring UI components (generated)",
+      "description": "Generated from the catalog schema: every one of the 62 names with its kind, summary, parents, children, props and one example page that compiles; the helpers, handles and scope names; which names the renderer does not draw yet."
+    },
+    {
+      "path": "resources/verbs-and-forms.md",
+      "title": "Verbs and forms",
+      "description": "Action placement and subjects, scope fill and with, legality (machine, offeredWhen, grants), verbs that follow the flag and preCheck, BulkAction over invoke_many, Check; Form, Field, Step, Submit with next, Preview, Lines with seedFrom, Candidates, and the model keys behind them."
+    },
+    {
+      "path": "resources/recipes.md",
+      "title": "Recipes",
+      "description": "Whole screens of a coach-hire app, each a real page that compiles and renders: a today queue, payments with presets and totals, a list with bulk verbs and an expandable row, a board, a record page, a week chart, files, availability over a chosen range (the busiest day, free capacity, a guard that names the day) and par vs delivered over a chosen range."
+    }
+  ]
+}

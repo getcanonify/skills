@@ -1,0 +1,42 @@
+{
+  "name": "series.book",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "series.book",
+    "description": "Book a planned series: the form opens with one row per planned date and its preview lists each one; a closed day is skipped, a busy slot refuses the series until that date is moved or dropped.",
+    "object_type": "series",
+    "input": {
+      "series_id": { "type": "ref series" },
+      "dates": { "type": "array", "min": 1, "max": 52, "items": {
+        "starts_at": { "type": "timestamp" } } }
+    },
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "subject": "series_id",
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "series", "where": { "id": "$input.series_id" }, "as": "series" },
+        { "op": "for_each", "in": "$input.dates", "as": "date", "on_item_fail": "refuse", "steps": [
+          { "op": "read_optional", "object": "calendar_day", "as": "day", "where": { "starts_at": { "lte": "$date.starts_at" } },
+            "order_by": { "property": "starts_at", "direction": "desc" } },
+          { "op": "assert", "when": { "ref": "$day.closed", "eq": false },
+            "else": { "code": "VALIDATION", "message": "Clinic closed", "on_item_fail": "skip" } },
+          { "op": "call", "fragment": "slot_free", "as": "free",
+            "with": { "practitioner_id": "$series.practitioner_id", "room_id": "$series.room_id", "exclude_id": "none",
+                      "starts_at": "$date.starts_at",
+                      "ends_at": { "op": "date_add", "left": "$date.starts_at", "right": { "n": "$series.minutes", "unit": "m" } } } },
+          { "op": "insert", "object": "appointment",
+            "values": { "patient_id": "$series.patient_id", "practitioner_id": "$series.practitioner_id", "room_id": "$series.room_id",
+                        "series_id": "$series.id", "occurrence_date": "$day.date", "minutes": "$series.minutes",
+                        "starts_at": "$date.starts_at",
+                        "ends_at": { "op": "date_add", "left": "$date.starts_at", "right": { "n": "$series.minutes", "unit": "m" } } } }
+        ] }
+      ],
+      "returns": { "series_id": "$series.id" }
+    },
+    "presentation": { "label": "Book dates", "success": "Series booked.",
+                      "inputLabels": { "dates": "Dates", "dates.starts_at": "Starts" },
+                      "seedFrom": { "dates": { "from": "$subject.dates", "map": { "starts_at": "starts_at" } } } }
+  }
+}
