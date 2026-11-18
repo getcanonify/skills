@@ -1,3 +1,5 @@
+Canonify is now AppSpring. These skills cover the retired canon CLI.
+
 # Canonify agent skills
 
 The Canonify CLI/REST/MCP manuals, mirrored from the
