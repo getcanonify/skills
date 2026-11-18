@@ -1,0 +1,192 @@
+# The canonify-app-authoring tutorial, chapters 1-5, as one runnable scenario.
+#
+#   canon catalog test resources/tutorial-replay
+#
+# boots an empty canon, replays every declaration below in INVOCATION order
+# (tables -> refinements -> actions -> state machine -> views), then drives the
+# deal lifecycle and tears the canon down. Nothing touches a live org.
+#
+# The principal is a `user` (an owner): an agent's own catalog declarations
+# park for approval (`approval_status: pending`) until an owner approves them,
+# which a replay has no one to do.
+name: tutorial-replay
+description: The five tutorial chapters, invoked in order, then the deal lifecycle.
+principals:
+  owner:
+    kind: user
+    id: usr_tutorial
+    org_id: org_test
+steps:
+  # ── Chapter 1 — tables ───────────────────────────────────────────────────
+  - action: schema.propose_migration
+    input:
+      description: customer table — the CRM root entity
+      sql: "CREATE TABLE customer (id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'prospect', created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"
+  - action: schema.propose_migration
+    input:
+      description: contact table — people at a customer
+      sql: "CREATE TABLE contact (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, role TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"
+  - action: schema.propose_migration
+    input:
+      description: deal table — amount is integer minor units
+      sql: "CREATE TABLE deal (id TEXT PRIMARY KEY, customer_id TEXT NOT NULL, title TEXT NOT NULL, amount INTEGER NOT NULL, stage TEXT NOT NULL DEFAULT 'open', won_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"
+
+  # ── Chapter 2 — refinements ──────────────────────────────────────────────
+  - action: catalog.refine_object_type
+    input:
+      name: deal
+      description: A sales opportunity against a customer — Deal.stage FSM-governed.
+      idPrefix: dl
+      properties:
+        stage: { kind: mapped, column: stage, type: enum, values: [open, proposal_sent, won, lost] }
+        amount: { kind: mapped, column: amount, type: money, currency: DKK }
+        won_at: { kind: mapped, column: won_at, type: timestamp, nullable: true }
+      links:
+        customer: { target: customer, cardinality: one, via: customer_id, fk_on: source }
+  - action: catalog.refine_object_type
+    input:
+      name: customer
+      description: The CRM root entity — an organisation we sell to.
+      idPrefix: cus
+      properties:
+        status: { kind: mapped, column: status, type: enum, values: [prospect, active, churned] }
+      links:
+        contacts: { target: contact, cardinality: many, via: customer_id, on_delete: cascade }
+        deals: { target: deal, cardinality: many, via: customer_id, on_delete: restrict }
+
+  # ── Chapter 4 — actions (declared BEFORE the machine that names them) ────
+  - action: actions.declare
+    input:
+      name: deal.send_proposal
+      description: Send a proposal for an open deal.
+      object_type: deal
+      input: { deal_id: { type: string } }
+      governance: { requires_approval: false, allowed_principals: [user, agent, service_account] }
+      idempotency: none
+      transition: { state_machine: Deal.stage, from: [open], to: proposal_sent }
+      handler:
+        steps:
+          - { op: read, object: deal, where: { id: $input.deal_id }, as: deal }
+        returns: { deal_id: $deal.id }
+  - action: actions.declare
+    input:
+      name: deal.win
+      description: Mark a deal as won.
+      object_type: deal
+      input: { deal_id: { type: string } }
+      governance: { requires_approval: false, allowed_principals: [user, agent, service_account] }
+      idempotency: none
+      transition: { state_machine: Deal.stage, from: [proposal_sent], to: won }
+      handler:
+        steps:
+          - { op: update, object: deal, where: { id: $input.deal_id }, set: { won_at: $now } }
+        returns: { deal_id: $input.deal_id }
+  - action: actions.declare
+    input:
+      name: deal.lose
+      description: Mark a deal as lost.
+      object_type: deal
+      input: { deal_id: { type: string } }
+      governance: { requires_approval: false, allowed_principals: [user, agent, service_account] }
+      idempotency: none
+      transition: { state_machine: Deal.stage, from: [open, proposal_sent], to: lost }
+      handler:
+        steps:
+          - { op: read, object: deal, where: { id: $input.deal_id }, as: deal }
+        returns: { deal_id: $deal.id }
+  - action: actions.declare
+    input:
+      name: deal.activate_customer
+      description: Activate the customer of a won deal.
+      object_type: deal
+      input: { deal_id: { type: string } }
+      governance: { requires_approval: false, allowed_principals: [user, agent, service_account] }
+      idempotency: none
+      handler:
+        steps:
+          - { op: read, object: deal, where: { id: $input.deal_id }, as: deal }
+          - op: assert
+            when: { ref: $deal.stage, eq: won }
+            else: { code: VALIDATION, message: Only a won deal activates its customer. }
+          - { op: update, object: customer, where: { id: $deal.customer_id }, set: { status: active } }
+        returns: { deal_id: $deal.id, customer_id: $deal.customer_id }
+
+  # ── Chapter 3 — the state machine (its via + hook actions now exist) ─────
+  - action: state_machines.register
+    input:
+      kind: state_machine
+      track: customer
+      name: Deal.stage
+      objectType: deal
+      property: stage
+      initial: open
+      states:
+        open: { label: Open }
+        proposal_sent: { label: Proposal sent }
+        won: { label: Won, terminal: true }
+        lost: { label: Lost, terminal: true }
+      transitions:
+        - { via: deal.send_proposal, from: [open], to: proposal_sent }
+        - { via: deal.win, from: [proposal_sent], to: won }
+        - { via: deal.lose, from: [open, proposal_sent], to: lost }
+      on_enter:
+        won:
+          - action: deal.activate_customer
+            inputs:
+              deal_id: $row.id
+
+  # ── Chapter 5 — views ────────────────────────────────────────────────────
+  - action: view_specs.declare
+    input:
+      name: Customer.list
+      object_type: customer
+      spec:
+        type: table
+        source: { objectType: customer }
+        columns: [name, email, status, deals.count]
+  - action: view_specs.declare
+    input:
+      name: Customer.active_count
+      object_type: customer
+      spec:
+        type: metric
+        label: Active customers
+        source: { objectType: customer, aggregate: { op: count }, filter: { status: active } }
+
+  # ── Run the business loop ────────────────────────────────────────────────
+  - action: customer.create
+    input: { name: Acme, email: buyer@acme.example.com }
+    bind: cust
+    expect:
+      data: { id: { matches: '^cus_' }, status: prospect }
+  - action: deal.create
+    input: { customer_id: $cust.id, title: Renewal, amount: 125000 }
+    bind: deal
+    expect:
+      data: { id: { matches: '^dl_' }, stage: open, amount: 125000 }
+
+  # The machine's guard: an open deal cannot be won directly.
+  - action: deal.win
+    input: { deal_id: $deal.id }
+    expect:
+      error: { code: INVALID_STATE }
+  - action: deal.send_proposal
+    input: { deal_id: $deal.id }
+  - action: deal.win
+    input: { deal_id: $deal.id }
+  - read: objects.get
+    input: { type: deal, id: $deal.id }
+    expect:
+      data: { stage: won, won_at: { matches: '^20' } }
+
+  # on_enter.won enqueued deal.activate_customer in the outbox. A live org
+  # drains the outbox by itself; the scenario harness drains it explicitly.
+  - tick: outbox
+  - read: objects.get
+    input: { type: customer, id: $cust.id }
+    expect:
+      data: { status: active }
+  - read: objects.navigate
+    input: { type: customer, id: $cust.id, link: deals }
+    expect:
+      data: { length: 1 }

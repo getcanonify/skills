@@ -1,0 +1,11 @@
+{
+  "name": "practitioners-cover-patients",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "group", "group": "practitioners" },
+    "resource": { "object_type": "patient" },
+    "operations": ["get", "list", "navigate", "aggregate"],
+    "row_filter": "{\"exists\": \"appointment\", \"via_link\": \"patient\", \"where\": \"cover_member_id = :principal.id\"}"
+  }
+}

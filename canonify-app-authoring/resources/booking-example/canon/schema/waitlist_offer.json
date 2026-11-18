@@ -1,0 +1,4 @@
+{
+  "table": "waitlist_offer",
+  "sql": "CREATE TABLE waitlist_offer (\n  id TEXT PRIMARY KEY,\n  waitlist_entry_id TEXT NOT NULL REFERENCES waitlist_entry(id),\n  appointment_id TEXT NOT NULL REFERENCES appointment(id),\n  patient_id TEXT NOT NULL REFERENCES patient(id),\n  expires_at TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'open',\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

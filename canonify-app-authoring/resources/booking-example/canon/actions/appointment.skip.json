@@ -1,0 +1,28 @@
+{
+  "name": "appointment.skip",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "appointment.skip",
+    "description": "Skip (cancel) a booked appointment with a reason. It stays on its series, still counted, and holds no slot.",
+    "object_type": "appointment",
+    "input": {
+      "appointment_id": { "type": "ref appointment" },
+      "reason": { "type": "string", "min": 1 }
+    },
+    "subject": "appointment_id",
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "handler": {
+      "steps": [
+        { "op": "read", "object": "appointment", "where": { "id": "$input.appointment_id" }, "as": "appointment" },
+        { "op": "assert", "when": { "ref": "$appointment.status", "eq": "booked" },
+          "else": { "code": "INVALID_STATE", "message": "Only a booked appointment is skipped." } },
+        { "op": "update", "object": "appointment", "where": { "id": "$appointment.id" },
+          "set": { "status": "cancelled", "cancel_reason": "$input.reason" } }
+      ],
+      "returns": { "appointment_id": "$appointment.id" }
+    },
+    "presentation": { "label": "Skip date", "success": "Skipped." }
+  }
+}

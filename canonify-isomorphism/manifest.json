@@ -1,0 +1,17 @@
+{
+  "name": "canonify-isomorphism",
+  "description": "Why REST, CLI, and MCP are three isomorphic projections of one Canon catalog — the runtime contract they all call, the envelope they all return, why they can't drift, and how to debug 'works on CLI but not REST'. Read SKILL.md first, then deep-dive on the runtime contract or connecting an MCP client.",
+  "version": "2.0.0",
+  "resources": [
+    {
+      "path": "resources/runtime-contract.md",
+      "title": "The runtime contract",
+      "description": "The five runtime entry points (invoke / get / list / navigate / sql_read) every surface calls, the REST / CLI / MCP mapping for each, REST read filters and the request body rule, the X-Catalog-Invalidate header, the opt-in NDJSON progress stream, and the principal kinds."
+    },
+    {
+      "path": "resources/connect-claude-desktop.md",
+      "title": "MCP access and connecting Claude Desktop",
+      "description": "The per-org /mcp/<slug> endpoint, its three credential types (API key, session, OAuth), the OAuth discovery and token endpoints, and the quickstart for wiring Claude Desktop to an org with per-org OAuth — one org per connection, auto-refreshing revocable tokens."
+    }
+  ]
+}

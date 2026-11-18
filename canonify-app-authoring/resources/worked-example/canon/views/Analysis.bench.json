@@ -1,0 +1,38 @@
+{
+  "name": "Analysis.bench",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Bench",
+    "icon": "flask-conical",
+    "object_type": "analysis",
+    "spec": {
+      "type": "queue",
+      "title": "Bench",
+      "why": "Every open analysis, soonest due first. Each row offers the one next step its state allows.",
+      "source": {
+        "objectType": "analysis",
+        "filter": { "status": { "in": ["queued", "running", "complete"] } }
+      },
+      "order": [{ "field": "due_at", "dir": "asc" }],
+      "urgency": { "from": "priority" },
+      "buckets": { "from": "due_at" },
+      "row": {
+        "title": "title",
+        "subtitle": "client_id",
+        "facts": [
+          { "value": "status", "label": "Status" },
+          { "value": "fee", "label": "Fee" }
+        ]
+      },
+      "actions": {
+        "primary": { "action": "analysis.start", "label": "Start", "key": "Enter" },
+        "secondary": [
+          { "action": "analysis.complete", "label": "Mark complete" },
+          { "action": "analysis.release", "label": "Release" }
+        ]
+      },
+      "empty": { "title": "Bench clear", "body": "No open analyses." }
+    }
+  }
+}

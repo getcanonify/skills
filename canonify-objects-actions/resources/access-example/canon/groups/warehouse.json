@@ -1,0 +1,6 @@
+{
+  "name": "warehouse",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": { "name": "warehouse", "label": "Warehouse" }
+}

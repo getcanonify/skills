@@ -1,0 +1,18 @@
+{
+  "name": "Claim.board",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Claims",
+    "icon": "kanban",
+    "object_type": "claim",
+    "spec": {
+      "type": "board",
+      "source": { "objectType": "claim" },
+      "groupBy": "status",
+      "columns": ["patient_id", "claimed", "approved"],
+      "createAction": "claim.build",
+      "rowActions": ["claim.submit", "claim.decide_partial"]
+    }
+  }
+}

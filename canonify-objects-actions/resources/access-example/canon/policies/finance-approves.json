@@ -1,0 +1,10 @@
+{
+  "name": "finance-approves",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "group", "group": "finance" },
+    "resource": { "action": "claim.approve" },
+    "operations": ["manage"]
+  }
+}

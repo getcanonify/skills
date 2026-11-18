@@ -1,0 +1,26 @@
+{
+  "name": "Analysis.record",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Analysis",
+    "icon": "flask-conical",
+    "object_type": "analysis",
+    "spec": {
+      "type": "detail",
+      "source": { "objectType": "analysis" },
+      "header": {
+        "title": "title",
+        "status": "status",
+        "metrics": ["fee", "fee_incl_vat", "revenue"]
+      },
+      "properties": [
+        "client_id",
+        "sample_id",
+        "priority",
+        "due_at",
+        "released_at"
+      ]
+    }
+  }
+}

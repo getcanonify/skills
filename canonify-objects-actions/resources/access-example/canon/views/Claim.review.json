@@ -1,0 +1,20 @@
+{
+  "name": "Claim.review",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "To review",
+    "icon": "check",
+    "object_type": "claim",
+    "spec": {
+      "type": "table",
+      "source": {
+        "objectType": "claim",
+        "filter": { "status": "submitted" },
+        "sort": "created_at"
+      },
+      "columns": ["title", "amount", "submitted_by"],
+      "rowActions": ["claim.approve"]
+    }
+  }
+}

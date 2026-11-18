@@ -1,0 +1,11 @@
+{
+  "name": "front-desk-no-scans",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "group", "group": "front_desk" },
+    "resource": { "object_type": "scan" },
+    "operations": ["get", "list", "navigate", "aggregate"],
+    "mode": "deny"
+  }
+}

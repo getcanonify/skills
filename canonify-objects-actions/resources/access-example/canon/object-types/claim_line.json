@@ -1,0 +1,24 @@
+{
+  "name": "claim_line",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "claim_line",
+    "description": "One receipt line on a claim.",
+    "idPrefix": "cln",
+    "properties": {
+      "claim_id": { "kind": "mapped", "column": "claim_id", "type": "string", "label": "Claim" },
+      "description": { "kind": "mapped", "column": "description", "type": "string", "label": "Description" },
+      "amount": { "kind": "mapped", "column": "amount", "type": "money", "currency": "DKK", "label": "Amount" }
+    },
+    "links": {
+      "claim": { "target": "claim", "cardinality": "one", "via": "claim_id", "fk_on": "source" }
+    },
+    "display": {
+      "entityKind": "Line",
+      "entityKindPlural": "Lines",
+      "icon": "list",
+      "title": { "property": "description" }
+    }
+  }
+}

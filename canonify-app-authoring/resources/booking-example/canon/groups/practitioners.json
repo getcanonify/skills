@@ -1,0 +1,10 @@
+{
+  "name": "practitioners",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "practitioners",
+    "label": "Practitioners",
+    "description": "See the patients they lead and the ones they have an appointment with."
+  }
+}

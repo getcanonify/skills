@@ -1,0 +1,16 @@
+{
+  "name": "Claim.list",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Claims",
+    "icon": "receipt",
+    "object_type": "claim",
+    "spec": {
+      "type": "table",
+      "source": { "objectType": "claim", "sort": "-created_at" },
+      "columns": ["title", "amount", "office", "status", "submitted_by"],
+      "rowActions": ["claim.approve"]
+    }
+  }
+}

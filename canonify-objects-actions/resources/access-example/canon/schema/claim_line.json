@@ -1,0 +1,4 @@
+{
+  "table": "claim_line",
+  "sql": "CREATE TABLE claim_line (\n  id           TEXT PRIMARY KEY,\n  claim_id     TEXT NOT NULL,\n  description  TEXT NOT NULL,\n  amount       INTEGER NOT NULL,\n  created_at   TEXT NOT NULL,\n  updated_at   TEXT NOT NULL\n)"
+}

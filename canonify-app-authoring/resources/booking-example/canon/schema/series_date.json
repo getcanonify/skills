@@ -1,0 +1,4 @@
+{
+  "table": "series_date",
+  "sql": "CREATE TABLE series_date (\n  id TEXT PRIMARY KEY,\n  series_id TEXT NOT NULL REFERENCES series(id) ON DELETE CASCADE,\n  starts_at TEXT NOT NULL,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

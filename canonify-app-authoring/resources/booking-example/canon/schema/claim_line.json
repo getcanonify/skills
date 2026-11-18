@@ -1,0 +1,4 @@
+{
+  "table": "claim_line",
+  "sql": "CREATE TABLE claim_line (\n  id TEXT PRIMARY KEY,\n  claim_id TEXT NOT NULL REFERENCES claim(id) ON DELETE CASCADE,\n  appointment_id TEXT NOT NULL UNIQUE REFERENCES appointment(id),\n  claimed INTEGER NOT NULL,\n  approved INTEGER,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

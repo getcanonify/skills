@@ -1,0 +1,88 @@
+{
+  "name": "claim",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "claim",
+    "description": "An insurer claim for a patient's attended sessions, one line per session. Build claims fills the patient's draft.",
+    "idPrefix": "clm",
+    "defaults": {
+      "create": false,
+      "update": false,
+      "delete": false
+    },
+    "properties": {
+      "patient_id": {
+        "kind": "mapped",
+        "column": "patient_id",
+        "type": "string",
+        "label": "Patient"
+      },
+      "status": {
+        "kind": "mapped",
+        "column": "status",
+        "type": "enum",
+        "label": "Status",
+        "values": [
+          "draft",
+          "submitted",
+          "partial"
+        ],
+        "valueLabels": {
+          "draft": "Draft",
+          "submitted": "Submitted",
+          "partial": "Partial"
+        }
+      },
+      "reason": {
+        "kind": "mapped",
+        "column": "reason",
+        "type": "string",
+        "label": "Reason",
+        "nullable": true
+      },
+      "lead_member_id": {
+        "kind": "derived",
+        "type": "string",
+        "label": "Lead member",
+        "hidden": true,
+        "expression": "SELECT p.member_id FROM patient pa JOIN practitioner p ON p.id = pa.lead_practitioner_id WHERE pa.id = claim.patient_id"
+      }
+    },
+    "links": {
+      "patient": {
+        "target": "patient",
+        "cardinality": "one",
+        "via": "patient_id",
+        "fk_on": "source"
+      },
+      "lines": {
+        "target": "claim_line",
+        "cardinality": "many",
+        "via": "claim_id",
+        "on_delete": "cascade",
+        "part_of": true
+      }
+    },
+    "rollups": {
+      "claimed": {
+        "link": "lines",
+        "agg": "sum",
+        "column": "claimed",
+        "label": "Claimed"
+      },
+      "approved": {
+        "link": "lines",
+        "agg": "sum",
+        "column": "approved",
+        "label": "Approved"
+      }
+    },
+    "display": {
+      "title": {
+        "template": "Claim {patient_id}"
+      },
+      "statusProperty": "status"
+    }
+  }
+}

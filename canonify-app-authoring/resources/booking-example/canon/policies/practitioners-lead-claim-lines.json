@@ -1,0 +1,11 @@
+{
+  "name": "practitioners-lead-claim-lines",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "subject": { "kind": "group", "group": "practitioners" },
+    "resource": { "object_type": "claim_line" },
+    "operations": ["get", "list", "navigate", "aggregate"],
+    "row_filter": "{\"via_link\": \"claim\", \"where\": \"lead_member_id = :principal.id\"}"
+  }
+}

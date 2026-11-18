@@ -1,0 +1,85 @@
+{
+  "name": "waitlist_offer",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "waitlist_offer",
+    "description": "A freed slot (a cancelled appointment) offered to one waiting entry until expires_at. A slot holds one open or accepted offer at a time.",
+    "idPrefix": "wlo",
+    "properties": {
+      "waitlist_entry_id": {
+        "kind": "mapped",
+        "column": "waitlist_entry_id",
+        "type": "string",
+        "label": "Entry"
+      },
+      "appointment_id": {
+        "kind": "mapped",
+        "column": "appointment_id",
+        "type": "string",
+        "label": "Freed slot"
+      },
+      "patient_id": {
+        "kind": "mapped",
+        "column": "patient_id",
+        "type": "string",
+        "label": "Patient"
+      },
+      "expires_at": {
+        "kind": "mapped",
+        "column": "expires_at",
+        "type": "timestamp",
+        "label": "Expires"
+      },
+      "status": {
+        "kind": "mapped",
+        "column": "status",
+        "type": "enum",
+        "label": "Status",
+        "values": [
+          "open",
+          "accepted",
+          "expired"
+        ],
+        "valueLabels": {
+          "open": "Open",
+          "accepted": "Accepted",
+          "expired": "Expired"
+        },
+        "valueColors": {
+          "open": "warm",
+          "accepted": "good",
+          "expired": "neutral"
+        }
+      }
+    },
+    "links": {
+      "entry": {
+        "target": "waitlist_entry",
+        "cardinality": "one",
+        "via": "waitlist_entry_id",
+        "fk_on": "source"
+      },
+      "slot": {
+        "target": "appointment",
+        "cardinality": "one",
+        "via": "appointment_id",
+        "fk_on": "source"
+      },
+      "patient": {
+        "target": "patient",
+        "cardinality": "one",
+        "via": "patient_id",
+        "fk_on": "source"
+      }
+    },
+    "display": {
+      "title": {
+        "derived": {
+          "via": "patient_id"
+        }
+      },
+      "statusProperty": "status"
+    }
+  }
+}

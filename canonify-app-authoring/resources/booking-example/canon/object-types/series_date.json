@@ -1,0 +1,42 @@
+{
+  "name": "series_date",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "series_date",
+    "description": "One planned date of a series, at its wall-clock time; Book dates opens with one row per planned date.",
+    "idPrefix": "sdt",
+    "defaults": {
+      "create": false,
+      "update": false,
+      "delete": false
+    },
+    "properties": {
+      "series_id": {
+        "kind": "mapped",
+        "column": "series_id",
+        "type": "string",
+        "label": "Series"
+      },
+      "starts_at": {
+        "kind": "mapped",
+        "column": "starts_at",
+        "type": "timestamp",
+        "label": "Starts"
+      }
+    },
+    "links": {
+      "series": {
+        "target": "series",
+        "cardinality": "one",
+        "via": "series_id",
+        "fk_on": "source"
+      }
+    },
+    "display": {
+      "title": {
+        "property": "starts_at"
+      }
+    }
+  }
+}

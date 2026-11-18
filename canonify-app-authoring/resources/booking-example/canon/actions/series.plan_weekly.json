@@ -1,0 +1,45 @@
+{
+  "name": "series.plan_weekly",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "series.plan_weekly",
+    "description": "Plan a weekly series: one date per chosen weekday from the first session, at its wall-clock time, on the first `occurrences` such dates (a closed day counts). Books nothing: Book dates on the series books them.",
+    "object_type": "series",
+    "input": {
+      "patient_id": { "type": "ref patient" },
+      "practitioner_id": { "type": "ref practitioner" },
+      "room_id": { "type": "ref room" },
+      "first_start": { "type": "timestamp" },
+      "minutes": { "type": "number", "min": 15, "max": 240 },
+      "weekdays": { "type": "set<enum>", "enum": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
+      "occurrences": { "type": "number", "min": 1, "max": 52 }
+    },
+    "governance": { "requires_approval": false, "allowed_principals": ["user", "agent", "service_account"] },
+    "idempotency": "none",
+    "subject": "patient_id",
+    "handler": {
+      "steps": [
+        { "op": "read_optional", "object": "calendar_day", "as": "first", "where": { "starts_at": { "lte": "$input.first_start" } },
+          "order_by": { "property": "starts_at", "direction": "desc" } },
+        { "op": "assert", "when": { "ref": "$first.id", "present": true },
+          "else": { "code": "VALIDATION", "message": "That date is not on the calendar.", "field": "first_start" } },
+        { "op": "insert", "object": "series", "as": "series",
+          "values": { "patient_id": "$input.patient_id", "practitioner_id": "$input.practitioner_id", "room_id": "$input.room_id",
+                      "first_start": "$input.first_start", "minutes": "$input.minutes", "weekdays": "$input.weekdays",
+                      "occurrences": "$input.occurrences" } },
+        { "op": "read_many", "object": "calendar_day", "as": "days", "limit": "$input.occurrences",
+          "where": { "n": { "gte": "$first.n" }, "weekday": { "in": "$input.weekdays" } },
+          "order_by": { "property": "n", "direction": "asc" } },
+        { "op": "for_each", "in": "$days", "as": "day", "steps": [
+          { "op": "insert", "object": "series_date",
+            "values": { "series_id": "$series.id",
+                        "starts_at": { "op": "date_add", "left": "$input.first_start", "tz": "org",
+                                       "right": { "n": { "op": "-", "left": "$day.n", "right": "$first.n" }, "unit": "d" } } } }
+        ] }
+      ],
+      "returns": { "series_id": "$series.id" }
+    },
+    "presentation": { "label": "Plan weekly series", "success": "Series planned: book its dates.", "refresh": "navigate" }
+  }
+}

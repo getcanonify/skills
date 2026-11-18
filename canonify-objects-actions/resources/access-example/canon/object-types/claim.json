@@ -1,0 +1,40 @@
+{
+  "name": "claim",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "claim",
+    "description": "An expense claim a member submits; finance approves it.",
+    "idPrefix": "clm",
+    "properties": {
+      "title": { "kind": "mapped", "column": "title", "type": "string", "label": "Claim" },
+      "amount": { "kind": "mapped", "column": "amount", "type": "money", "currency": "DKK", "label": "Amount" },
+      "submitted_by": { "kind": "mapped", "column": "submitted_by", "type": "string", "label": "Submitted by" },
+      "office": {
+        "kind": "mapped",
+        "column": "office",
+        "type": "enum",
+        "label": "Office",
+        "values": ["cph", "aar"],
+        "valueLabels": { "cph": "Copenhagen", "aar": "Aarhus" }
+      },
+      "status": {
+        "kind": "mapped",
+        "column": "status",
+        "type": "enum",
+        "label": "Status",
+        "values": ["submitted", "approved"],
+        "valueLabels": { "submitted": "Submitted", "approved": "Approved" }
+      }
+    },
+    "links": {
+      "lines": { "target": "claim_line", "cardinality": "many", "via": "claim_id", "on_delete": "cascade" }
+    },
+    "display": {
+      "entityKind": "Claim",
+      "entityKindPlural": "Claims",
+      "icon": "receipt",
+      "title": { "property": "title" }
+    }
+  }
+}

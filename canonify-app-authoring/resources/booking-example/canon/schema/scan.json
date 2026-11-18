@@ -1,0 +1,4 @@
+{
+  "table": "scan",
+  "sql": "CREATE TABLE scan (\n  id TEXT PRIMARY KEY,\n  patient_id TEXT NOT NULL REFERENCES patient(id),\n  taken_on TEXT NOT NULL,\n  image TEXT,\n  created_at TEXT NOT NULL,\n  updated_at TEXT NOT NULL\n)"
+}

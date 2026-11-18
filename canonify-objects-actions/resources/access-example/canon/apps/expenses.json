@@ -1,0 +1,12 @@
+{
+  "name": "expenses",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "slug": "expenses",
+    "name": "Expenses",
+    "icon": "receipt",
+    "defaultView": "Claim.review",
+    "nav": [{ "view": "Claim.review" }, { "view": "Claim.list" }]
+  }
+}

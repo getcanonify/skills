@@ -1,0 +1,6 @@
+{
+  "name": "cph",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": { "name": "cph", "label": "Copenhagen office" }
+}

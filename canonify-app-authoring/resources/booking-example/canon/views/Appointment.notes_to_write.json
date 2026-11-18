@@ -1,0 +1,16 @@
+{
+  "name": "Appointment.notes_to_write",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "title": "Notes to write",
+    "icon": "notebook-pen",
+    "object_type": "appointment",
+    "spec": {
+      "type": "table",
+      "source": { "objectType": "appointment", "filter": { "status": "attended", "has_note": false }, "sort": "-starts_at" },
+      "columns": ["starts_at", "patient_id", "practitioner_id"],
+      "rowActions": [{ "action": "appointment.write_note", "default": true }]
+    }
+  }
+}

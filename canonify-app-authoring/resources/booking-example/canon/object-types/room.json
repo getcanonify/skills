@@ -1,0 +1,29 @@
+{
+  "name": "room",
+  "managed_by": "managed",
+  "source_ref": null,
+  "definition": {
+    "name": "room",
+    "description": "A room; capacity is how many appointments it holds at once.",
+    "idPrefix": "rm",
+    "properties": {
+      "name": {
+        "kind": "mapped",
+        "column": "name",
+        "type": "string",
+        "label": "Room"
+      },
+      "capacity": {
+        "kind": "mapped",
+        "column": "capacity",
+        "type": "number",
+        "label": "Capacity"
+      }
+    },
+    "display": {
+      "title": {
+        "property": "name"
+      }
+    }
+  }
+}
